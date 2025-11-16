@@ -39,18 +39,18 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"chalk": "^5.3.0",
+		"chalk": "^5.6.2",
 		"mdast-util-from-markdown": "^2.0.2",
 		"mdast-util-gfm": "^3.1.0",
 		"micromark": "^4.0.2",
 		"micromark-extension-gfm": "^3.0.0",
 		"micromark-util-combine-extensions": "^2.0.1",
-		"string-width": "^7.1.0",
-		"strip-ansi": "^7.1.0",
-		"supports-hyperlinks": "^3.2.0"
+		"string-width": "^8.1.0",
+		"strip-ansi": "^7.1.2",
+		"supports-hyperlinks": "^4.3.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.5",
-		"vitest": "^4.0.0"
+		"vitest": "^4.0.9"
 	}
 }
