@@ -13,12 +13,13 @@ function resolveOptions(userOptions = {}) {
     userOptions.hyperlinks !== undefined
       ? userOptions.hyperlinks
       : color && hyperlinkSupported();
+  const effectiveHyperlinks = color ? hyperlinks : false;
   const theme =
     userOptions.theme && typeof userOptions.theme === 'object'
       ? userOptions.theme
       : themes[userOptions.theme || 'default'] || themes.default;
   const highlighter = userOptions.highlighter;
-  return { wrap, width: baseWidth, color, hyperlinks, theme, highlighter };
+  return { wrap, width: baseWidth, color, hyperlinks: effectiveHyperlinks, theme, highlighter };
 }
 
 const HR_WIDTH = 40;

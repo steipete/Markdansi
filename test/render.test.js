@@ -93,4 +93,15 @@ describe('hyperlinks', () => {
     const out = strip('[link](https://example.com)', { ...noColor });
     expect(out).toContain('link (https://example.com)');
   });
+
+  it('emits OSC-8 hyperlinks when enabled', () => {
+    const out = render('[x](https://example.com)', { color: true, hyperlinks: true, wrap: false });
+    expect(out).toContain('\u001B]8;;https://example.com\u0007x\u001B]8;;\u0007');
+  });
+
+  it('disables OSC when color is false even if hyperlinks true', () => {
+    const out = render('[x](https://example.com)', { color: false, hyperlinks: true, wrap: false });
+    expect(out).not.toContain('\u001B]8;;');
+    expect(out).toContain('x (https://example.com)');
+  });
 });
