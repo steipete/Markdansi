@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, strip } from '../src/index.js';
+import { themes } from '../src/theme.js';
 
 const noColor = { color: false, hyperlinks: false, wrap: true, width: 40 };
 
@@ -7,6 +8,20 @@ describe('inline formatting', () => {
   it('renders emphasis/strong/code/strike', () => {
     const out = strip('Hello _em_ **strong** `code` ~~gone~~', noColor);
     expect(out).toContain('Hello em strong code gone');
+  });
+
+  it('uses blockCode / inlineCode themes distinctly', () => {
+    const ansi = render('`inline`\n\n```\nblock\n```', {
+      color: true,
+      theme: {
+        ...themes.default,
+        inlineCode: { color: 'red' },
+        blockCode: { color: 'green' },
+      },
+      wrap: false,
+    });
+    expect(ansi).toContain('\u001b[31minline'); // red
+    expect(ansi).toContain('\u001b[32mblock'); // green
   });
 });
 

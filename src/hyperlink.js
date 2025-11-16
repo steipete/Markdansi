@@ -1,7 +1,10 @@
 import supportsHyperlinks from 'supports-hyperlinks';
 
 export function hyperlinkSupported(stream = process.stdout) {
-  return supportsHyperlinks.stdout(stream);
+  if (supportsHyperlinks && typeof supportsHyperlinks.stdout === 'function') {
+    return supportsHyperlinks.stdout(stream);
+  }
+  return false;
 }
 
 export function osc8(url, text) {

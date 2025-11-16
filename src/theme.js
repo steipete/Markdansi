@@ -4,7 +4,8 @@ const base = {
   heading: { color: 'yellow', bold: true },
   strong: { bold: true },
   emph: { italic: true },
-  code: { color: 'cyan', dim: true },
+  inlineCode: { color: 'cyan', dim: true },
+  blockCode: { color: 'cyan', dim: true },
   link: { color: 'blue', underline: true },
   quote: { dim: true },
   hr: { dim: true },
@@ -23,7 +24,8 @@ const bright = {
   ...base,
   heading: { color: 'magenta', bold: true },
   link: { color: 'cyan', underline: true },
-  code: { color: 'green' },
+  inlineCode: { color: 'green' },
+  blockCode: { color: 'green' },
 };
 
 export const themes = {

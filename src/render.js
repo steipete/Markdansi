@@ -13,8 +13,10 @@ function resolveOptions(userOptions = {}) {
     userOptions.hyperlinks !== undefined
       ? userOptions.hyperlinks
       : color && hyperlinkSupported();
-  const themeName = userOptions.theme || 'default';
-  const theme = themes[themeName] || themes.default;
+  const theme =
+    userOptions.theme && typeof userOptions.theme === 'object'
+      ? userOptions.theme
+      : themes[userOptions.theme || 'default'] || themes.default;
   const highlighter = userOptions.highlighter;
   return { wrap, width: baseWidth, color, hyperlinks, theme, highlighter };
 }
@@ -93,7 +95,9 @@ function renderParagraph(node, ctx, indentLevel) {
 function renderHeading(node, ctx) {
   const text = renderInline(node.children, ctx);
   const styled = ctx.style(text, ctx.options.theme.heading);
-  return [`\n${styled}\n`];
+  return [`
+
+`];
 }
 
 function renderHr(ctx) {
@@ -147,7 +151,7 @@ function renderListItem(node, ctx, indentLevel, tight, ordered = false, start = 
 }
 
 function renderCodeBlock(node, ctx) {
-  const theme = ctx.options.theme.code;
+  const theme = ctx.options.theme.blockCode || ctx.options.theme.inlineCode;
   const label = node.lang ? ctx.style(`[${node.lang}] `, { dim: true }) : '';
   let body = node.value ?? '';
   if (ctx.options.highlighter) {
@@ -179,7 +183,8 @@ function renderInline(children, ctx) {
         out += ctx.style(renderInline(node.children, ctx), { strike: true });
         break;
       case 'inlineCode': {
-        const content = ctx.style(node.value, ctx.options.theme.code);
+        const codeTheme = ctx.options.theme.inlineCode || ctx.options.theme.blockCode;
+        const content = ctx.style(node.value, codeTheme);
         out += content;
         break;
       }
