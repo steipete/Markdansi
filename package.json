@@ -16,7 +16,7 @@
 	"scripts": {
 		"build": "pnpm lint && pnpm test",
 		"clean": "rm -rf dist",
-		"lint": "rm -rf dist && biome check .",
+		"lint": "rm -rf dist coverage && biome check .",
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"types": "tsc -p tsconfig.json",

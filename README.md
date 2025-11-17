@@ -18,12 +18,14 @@ npm install markdansi
 
 ```bash
 markdansi [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright]
+[--list-indent N] [--quote-prefix STR]
 ```
 
 - Input: stdin if `--in` not given (use `--in -` for stdin explicitly).
 - Output: stdout unless `--out` provided.
 - Wrapping: on by default; `--no-wrap` disables hard wrapping.
 - Links: OSC‑8 when supported; `--no-links` disables.
+- Lists/quotes: `--list-indent` sets spaces per nesting level (default 2); `--quote-prefix` sets blockquote prefix (default `│ `).
 
 ## Library
 
@@ -57,6 +59,8 @@ console.log(custom('`inline`\n\n```\nblock code\n```'));
 - `color` (default TTY): `false` removes all ANSI/OSC.
 - `hyperlinks` (default auto): enable/disable OSC‑8 links.
 - `theme`: `default | dim | bright` or custom theme object.
+- `listIndent`: spaces per nesting level (default 2).
+- `quotePrefix`: blockquote line prefix (default `│ `).
 - `highlighter(code, lang)`: optional hook to recolor code blocks; must not add/remove newlines.
 
 ## Status
