@@ -39,7 +39,7 @@
 		"url": "https://github.com/steipete/Markdansi/issues"
 	},
 	"homepage": "https://github.com/steipete/Markdansi#readme",
-	"author": "",
+	"author": "Peter Steinberger",
 	"license": "MIT",
 	"sideEffects": false,
 	"files": [
@@ -66,6 +66,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.5",
+		"@types/node": "^24.10.1",
 		"@vitest/coverage-v8": "^4.0.9",
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.9"

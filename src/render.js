@@ -22,6 +22,8 @@ function resolveOptions(userOptions = {}) {
 			? userOptions.theme
 			: themes[userOptions.theme || "default"] || themes.default;
 	const highlighter = userOptions.highlighter;
+	const listIndent = userOptions.listIndent ?? 2;
+	const quotePrefix = userOptions.quotePrefix ?? "│ ";
 	return {
 		wrap,
 		width: baseWidth,
@@ -29,6 +31,8 @@ function resolveOptions(userOptions = {}) {
 		hyperlinks: effectiveHyperlinks,
 		theme,
 		highlighter,
+		listIndent,
+		quotePrefix,
 	};
 }
 
@@ -81,7 +85,7 @@ function renderNode(node, ctx, indentLevel, isTightList) {
 
 function renderParagraph(node, ctx, indentLevel) {
 	const text = renderInline(node.children, ctx);
-	const prefix = "  ".repeat(indentLevel);
+	const prefix = " ".repeat(ctx.options.listIndent * indentLevel);
 	const lines = wrapWithPrefix(
 		text,
 		ctx.options.width ?? 80,
@@ -107,7 +111,7 @@ function renderHr(ctx) {
 
 function renderBlockquote(node, ctx, indentLevel) {
 	const content = renderChildren(node.children, ctx, indentLevel + 1);
-	const prefix = ctx.style("│ ", ctx.options.theme.quote);
+	const prefix = ctx.style(ctx.options.quotePrefix, ctx.options.theme.quote);
 	const lines = content
 		.join("")
 		.split("\n")
@@ -152,7 +156,7 @@ function renderListItem(
 	const isTask = typeof node.checked === "boolean";
 	const box = isTask ? (node.checked ? "[x]" : "[ ]") : null;
 	const firstBullet =
-		"  ".repeat(indentLevel) +
+		" ".repeat(ctx.options.listIndent * indentLevel) +
 		(isTask
 			? `${ctx.style(box, ctx.options.theme.listMarker)} `
 			: `${markerStyled} `);
@@ -160,7 +164,12 @@ function renderListItem(
 	const lines = [];
 	content.forEach((line, i) => {
 		const clean = line.replace(/^\s+/, "");
-		const prefix = i === 0 ? firstBullet : `${"  ".repeat(indentLevel)}  `;
+		const prefix =
+			i === 0
+				? firstBullet
+				: `${" ".repeat(ctx.options.listIndent * indentLevel)}${" ".repeat(
+						ctx.options.listIndent,
+					)}`;
 		lines.push(prefix + clean);
 	});
 	if (!tight) lines.push("");
@@ -248,6 +257,7 @@ function renderTable(node, ctx) {
 	);
 	const colCount = Math.max(...cells.map((r) => r.length));
 	const widths = new Array(colCount).fill(1);
+	const aligns = node.align || [];
 
 	cells.forEach((row) => {
 		row.forEach((cell, idx) => {
@@ -274,7 +284,7 @@ function renderTable(node, ctx) {
 	const renderRow = (row, isHeader = false) => {
 		const linesPerCol = row.map((cell, idx) =>
 			wrapText(cell, widths[idx], ctx.options.wrap).map((l) =>
-				padCell(l, widths[idx]),
+				padCell(l, widths[idx], aligns[idx]),
 			),
 		);
 		// Row height = max wrapped lines in any column; pad shorter ones
@@ -282,7 +292,7 @@ function renderTable(node, ctx) {
 		const out = [];
 		for (let i = 0; i < height; i += 1) {
 			const parts = linesPerCol.map((col, idx) => {
-				const content = col[i] ?? padCell("", widths[idx]);
+				const content = col[i] ?? padCell("", widths[idx], aligns[idx]);
 				return isHeader
 					? ctx.style(content, ctx.options.theme.tableHeader)
 					: ctx.style(content, ctx.options.theme.tableCell);
@@ -304,8 +314,14 @@ function renderTable(node, ctx) {
 	return [...headerRows, divider, ...bodyRows, "\n"];
 }
 
-function padCell(text, width) {
+function padCell(text, width, align = "left") {
 	const pad = width - stringWidth(stripAnsi(text));
-	if (pad > 0) return text + " ".repeat(pad);
-	return text;
+	if (pad <= 0) return text;
+	if (align === "right") return `${" ".repeat(pad)}${text}`;
+	if (align === "center") {
+		const left = Math.floor(pad / 2);
+		const right = pad - left;
+		return `${" ".repeat(left)}${text}${" ".repeat(right)}`;
+	}
+	return `${text}${" ".repeat(pad)}`;
 }

@@ -1,5 +1,8 @@
 import supportsHyperlinks from "supports-hyperlinks";
 
+/**
+ * Detect OSC-8 hyperlink support for a given stream (defaults to stdout).
+ */
 export function hyperlinkSupported(stream = process.stdout) {
 	if (supportsHyperlinks && typeof supportsHyperlinks.stdout === "function") {
 		return supportsHyperlinks.stdout(stream);

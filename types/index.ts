@@ -48,6 +48,14 @@ export interface RenderOptions {
 	hyperlinks?: boolean;
 	color?: boolean;
 	theme?: ThemeName | Theme;
+	/**
+	 * Spaces per nesting level for lists (default 2).
+	 */
+	listIndent?: number;
+	/**
+	 * Prefix used for blockquotes (default "│ ").
+	 */
+	quotePrefix?: string;
 	highlighter?: Highlighter;
 }
 
@@ -62,3 +70,4 @@ export declare function strip(
 	markdown: string,
 	options?: RenderOptions,
 ): string;
+export declare const themes: Record<ThemeName | string, Theme>;

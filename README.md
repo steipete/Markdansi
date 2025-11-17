@@ -28,8 +28,7 @@ markdansi [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-li
 ## Library
 
 ```js
-import { render, createRenderer, strip } from 'markdansi';
-import { createStyler } from 'markdansi/src/theme.js'; // custom theme building (optional)
+import { render, createRenderer, strip, themes } from 'markdansi';
 
 const ansi = render('# Hello **world**', { width: 60 });
 
@@ -42,7 +41,7 @@ const plain = strip('link to [x](https://example.com)');
 // Custom theme and highlighter hook
 const custom = createRenderer({
   theme: {
-    ...require('markdansi/src/theme.js').themes.default,
+    ...themes.default,
     inlineCode: { color: 'red' },
     blockCode: { color: 'green' },
   },
