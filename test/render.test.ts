@@ -445,8 +445,8 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 		expect(lines[0]).toBe("Body line.");
 		expect(lines[1]).toBe(""); // blank line before definition
 		expect(lines[2]).toBe('[1]: https://example.com "Title"');
-		expect(lines[3]).toBe(""); // blank line after definition
-		expect(lines[4]).toBe("Next.");
+		expect(lines[3]).toBe("Next.");
+		expect(lines[4]).toBe(""); // final newline
 	});
 });
 

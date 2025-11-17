@@ -309,6 +309,7 @@ function renderParagraph(
 	const rawLines = text.split("\n");
 	const normalized: string[] = [];
 	const defPattern = /^\[[^\]]+]:\s+\S/;
+	let inDefinitions = false;
 	for (const line of rawLines) {
 		if (
 			defPattern.test(line) &&
@@ -317,8 +318,17 @@ function renderParagraph(
 		) {
 			normalized.push(""); // insert blank line before footer-style definitions
 		}
+		if (defPattern.test(line)) {
+			inDefinitions = true;
+			normalized.push(line);
+			continue;
+		}
+		if (inDefinitions && line.trim() === "") {
+			// skip extra blank lines inside the definitions block
+			continue;
+		}
+		inDefinitions = false;
 		normalized.push(line);
-		if (defPattern.test(line)) normalized.push(""); // and after, for spacing
 	}
 	const lines = normalized.flatMap((l) =>
 		wrapWithPrefix(l, ctx.options.width ?? 80, ctx.options.wrap, prefix),
