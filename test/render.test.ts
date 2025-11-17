@@ -113,6 +113,37 @@ describe("lists and tasks", () => {
 });
 
 describe("tables", () => {
+	it("does not linkify underscores inside tables", () => {
+		const md = `
+| Filename | Size |
+| --- | --- |
+| icon_16x16.png | 16 |
+| icon_16x16@2x.png | 32 |
+`;
+		const out = strip(md, { ...noColor, wrap: true, tableTruncate: false });
+		const lines = out.split("\n").filter((l) => l.includes("icon_16x16"));
+		lines.forEach((line) => {
+			expect(line).not.toMatch(/https?:/);
+			expect(line).toContain("icon_16x16");
+		});
+	});
+
+	it("respects inline links in table cells but keeps other cells plain", () => {
+		const md = `
+| File | Link |
+| --- | --- |
+| icon_16x16.png | https://example.com/icon.png |
+`;
+		const out = strip(md, {
+			...noColor,
+			wrap: true,
+			hyperlinks: false,
+			tableTruncate: false,
+			width: 60,
+		});
+		expect(out).toContain("icon_16x16.png");
+		expect(out).toContain("https://example.com/icon.png");
+	});
 	it("renders ascii and no-border tables with padding/dense options", () => {
 		const md = `
 | h1 | h2 |

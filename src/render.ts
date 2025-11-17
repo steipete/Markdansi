@@ -455,6 +455,9 @@ function renderInline(
 function renderLink(node: Link, ctx: RenderContext): string {
 	const label = renderInline(node.children, ctx) || node.url;
 	const url = node.url || "";
+	if (url.startsWith("mailto:")) {
+		return ctx.style(label, ctx.options.theme.link ?? {});
+	}
 	if (ctx.options.hyperlinks && url) {
 		return osc8(url, label);
 	}
