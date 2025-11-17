@@ -120,6 +120,72 @@ function resolveOptions(userOptions: RenderOptions = {}): ResolvedOptions {
 	return resolved;
 }
 
+/**
+ * Normalize parsed nodes to avoid misclassifying reference-style metadata as code.
+ * Some sources emit footnote-like link definitions where the title is placed
+ * on the following indented lines (often copied with tabs). When GFM parsing
+ * misses the closing quote, those continuations become indented code blocks.
+ * To keep output readable, merge such continuations back into the definition
+ * paragraph and render as regular text.
+ */
+function extractText(node: { value?: unknown; children?: unknown }): string {
+	if (typeof node.value === "string") return node.value;
+	if (Array.isArray(node.children)) {
+		return node.children.map((child) => extractText(child as never)).join("");
+	}
+	return "";
+}
+
+function getParagraphText(node: Paragraph): string {
+	return extractText(node);
+}
+
+function normalizeNodes(tree: Root): Root {
+	const normalized: Root["children"] = [];
+
+	for (let i = 0; i < tree.children.length; i += 1) {
+		const node = tree.children[i];
+		if (node?.type === "paragraph" && node.children.length >= 1) {
+			const text = getParagraphText(node);
+			const defMatch = text.match(/^\[(\d+|\w+)]:\s+\S.*"\s*$/);
+			const next = tree.children[i + 1];
+			if (defMatch && next?.type === "code" && !next.lang) {
+				const continuation = next.value
+					.replace(/^[ \t>]+/gm, " ")
+					.replace(/\s+/g, " ")
+					.trim();
+				const merged = `${text.replace(/\s+"$/, '"')} ${
+					continuation ? continuation.replace(/^"+|"+$/g, "").trim() : ""
+				}`.trim();
+				normalized.push({
+					type: "paragraph",
+					children: [{ type: "text", value: merged }],
+					position: node.position,
+				});
+				i += 1; // skip the consumed code block
+				continue;
+			}
+		}
+
+		// As a fallback, rewrite indented code blocks that look like lone definitions.
+		if (node?.type === "code" && !node.lang) {
+			const stripped = node.value.replace(/^[ \t>]+/gm, "").trim();
+			if (/^\[(\d+|\w+)]:\s+\S+/.test(stripped)) {
+				normalized.push({
+					type: "paragraph",
+					children: [{ type: "text", value: stripped }],
+					position: node.position,
+				});
+				continue;
+			}
+		}
+
+		if (node) normalized.push(node);
+	}
+
+	return { ...tree, children: normalized };
+}
+
 const HR_WIDTH = 40;
 const MAX_COL = 40;
 const TABLE_BOX = {
@@ -160,7 +226,7 @@ export function render(
 ): string {
 	const options = resolveOptions(userOptions);
 	const style = createStyler({ color: options.color });
-	const tree = parse(dedent(markdown));
+	const tree = normalizeNodes(parse(dedent(markdown)));
 	const ctx: RenderContext = { options, style };
 	const body = renderChildren(tree.children, ctx, 0, true).join("");
 	return options.color ? body : stripAnsi(body);

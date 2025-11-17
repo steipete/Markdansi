@@ -1,4 +1,4 @@
-# Markdansi v0.1.1 – Design Spec
+# Markdansi v0.1.2 – Design Spec
 
 Goal: Tiny, dependency‑light Markdown → ANSI renderer & CLI for Node ≥22, using pnpm. Output is terminal ANSI only (no HTML). Focus on readable defaults, sensible wrapping, and minimal runtime deps.
 
@@ -94,3 +94,4 @@ Each theme entry holds simple SGR intents (bold/italic/fg color names). `inlineC
 - Lists: honor GFM tight vs loose lists (tight => no blank line between items; loose => blank line). Nesting indent = 2 spaces per level; bullets use `-`; ordered lists use input numbering.
 - Blockquotes: prefix each wrapped line with `│ ` (configurable via `quotePrefix`); quote content wraps accounting for the prefix width.
 - List indent is configurable via `listIndent` (default 2 spaces per level).
+- Reference-style definitions with indented title continuations are merged into a single paragraph (instead of becoming indented code blocks), preventing stray boxed output in copied logs.

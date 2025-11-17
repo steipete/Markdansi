@@ -1,4 +1,4 @@
-# 🎨 Markdansi: Wraps, colors, links - no baggage.
+# 🎨 Markdansi: Wraps, colors, links—no baggage.
 ![npm](https://img.shields.io/npm/v/markdansi) ![license MIT](https://img.shields.io/badge/license-MIT-blue.svg) ![node >=22](https://img.shields.io/badge/node-%3E%3D22-brightgreen) ![tests vitest](https://img.shields.io/badge/tests-vitest-blue?logo=vitest)
 
 Tiny, dependency-light Markdown → ANSI renderer and CLI for modern Node (>=22). Focuses on readable terminal output with sensible wrapping, GFM support (tables, task lists, strikethrough), optional OSC‑8 hyperlinks, and zero built‑in syntax highlighting (pluggable hook). Written in TypeScript, ships ESM.
@@ -69,13 +69,14 @@ console.log(custom('`inline`\n\n```\nblock code\n```'));
 
 ## Status
 
-Version: `0.1.1` (released)  
+Version: `0.1.2` (released)  
 Tests: `pnpm test`  
 License: MIT
 
 ## Notes
 
 - Code blocks wrap to the render width by default; disable with `codeWrap=false`. If `lang` is present, a faint `[lang]` label is shown and boxes use unicode borders.
+- Link/reference definitions that spill their titles onto indented lines are merged back into one line so copied notes don’t turn into boxed code.
 - Tables use unicode borders by default, include padding, respect GFM alignment, and truncate long cells with `…` so layouts stay tidy. Turn off truncation with `tableTruncate=false`.
 - Tight vs loose lists follow GFM; task items render `[ ]` / `[x]`.
 

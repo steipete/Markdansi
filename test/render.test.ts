@@ -386,11 +386,12 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 	});
 
 	it("renders language label in code box header", () => {
-		const md = "```bash\nfoo\n```";
+		const md = "```bash\nthis line is definitely longer than the label\n```";
 		const out = render(md, { color: false, wrap: false });
 		const firstLine = out.split("\n")[0];
 		expect(firstLine.startsWith("┌")).toBe(true);
 		expect(firstLine).toContain("[bash]");
+		expect(firstLine).toMatch(/┌ \[bash]─+┐/);
 	});
 
 	it("omits label when language is absent", () => {
@@ -418,6 +419,14 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 		const md = "```bash\nfoo\n```";
 		const out = render(md, { color: false, wrap: false });
 		expect(out.startsWith("┌")).toBe(true);
+	});
+
+	it("keeps reference-style continuations out of code boxes", () => {
+		const md = `[1]: https://example.com/icon "\n\t Icon Composer Notes \n\t\n"`;
+		const out = render(md, { color: false, wrap: true });
+		expect(out).not.toContain("┌"); // no boxed code
+		expect(out).toContain(`[1]: https://example.com/icon "`);
+		expect(out).toContain("Icon Composer Notes");
 	});
 });
 

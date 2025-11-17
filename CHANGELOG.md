@@ -12,10 +12,12 @@
 - Docs/spec/README updated; publish as `markdansi@0.1.1` on npm.
 - Code box header now embeds `[lang]` label in the top border; added tests for long labels, no-label cases, and gutters.
 
-## 0.1.2 (unreleased)
+## 0.1.2 (2025-11-17)
 
-### Planned / in progress
-- (open for next cycle)
+### Highlights
+- Normalize link/reference definitions that spill titles onto indented lines so they render as plain text instead of boxed code (fixes pasted blog footnotes).
+- Code box headers now pad with dashes when the label is shorter than the body line length; added regression coverage.
+- Added tests covering footnote-style continuations and header padding; ensured docs/README/spec mention the behavior.
 
 ## 0.1.0 (2025-11-16)
 

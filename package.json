@@ -1,6 +1,6 @@
 {
 	"name": "markdansi",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Tiny dependency-light markdown to ANSI converter.",
 	"type": "module",
 	"main": "dist/index.js",
