@@ -61,6 +61,10 @@ console.log(custom('`inline`\n\n```\nblock code\n```'));
 - `theme`: `default | dim | bright` or custom theme object.
 - `listIndent`: spaces per nesting level (default 2).
 - `quotePrefix`: blockquote line prefix (default `│ `).
+- `tableBorder`: `unicode` (default) | `ascii` | `none`.
+- `tablePadding`: spaces inside cells (default 1); `tableDense` drops extra separators.
+- `tableTruncate`: cap cells to column width (ellipsis default `…`).
+- `codeBox`: draw a box around fenced code (default true); `codeGutter` shows line numbers; `codeWrap` wraps code lines.
 - `highlighter(code, lang)`: optional hook to recolor code blocks; must not add/remove newlines.
 
 ## Status

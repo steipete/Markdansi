@@ -57,6 +57,22 @@ export interface RenderOptions {
 	 * Prefix used for blockquotes (default "│ ").
 	 */
 	quotePrefix?: string;
+	/** Table border style: unicode (default), ascii, or none. */
+	tableBorder?: "unicode" | "ascii" | "none";
+	/** Spaces around cell content (default 1). */
+	tablePadding?: number;
+	/** If true, reduces separator rows (default false). */
+	tableDense?: boolean;
+	/** If true, truncates cell content to fit column width. */
+	tableTruncate?: boolean;
+	/** Ellipsis text for truncation (default "…"). */
+	tableEllipsis?: string;
+	/** Draw a box around fenced code blocks (default true). */
+	codeBox?: boolean;
+	/** Show line-number gutter for code blocks (default false). */
+	codeGutter?: boolean;
+	/** Wrap code lines to width; otherwise overflow (default false). */
+	codeWrap?: boolean;
 	highlighter?: Highlighter;
 }
 
