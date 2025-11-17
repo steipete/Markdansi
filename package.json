@@ -17,7 +17,8 @@
 		"build": "pnpm lint && pnpm test",
 		"clean": "rm -rf dist",
 		"lint": "biome check .",
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage"
 	},
 	"keywords": [
 		"markdown",
@@ -51,6 +52,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.5",
+		"@vitest/coverage-v8": "^4.0.9",
 		"vitest": "^4.0.9"
 	}
 }

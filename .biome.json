@@ -7,6 +7,9 @@
 	"organizeImports": {
 		"enabled": true
 	},
+	"files": {
+		"ignore": ["coverage/**", "**/coverage/**", "node_modules/**", "dist/**"]
+	},
 	"linter": {
 		"rules": {
 			"recommended": true

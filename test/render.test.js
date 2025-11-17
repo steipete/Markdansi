@@ -1,6 +1,9 @@
+import supportsHyperlinks from "supports-hyperlinks";
 import { describe, expect, it } from "vitest";
+import { hyperlinkSupported } from "../src/hyperlink.js";
 import { render, strip } from "../src/index.js";
-import { themes } from "../src/theme.js";
+import { createStyler, themes } from "../src/theme.js";
+import { wrapText } from "../src/wrap.js";
 
 const noColor = { color: false, hyperlinks: false, wrap: true, width: 40 };
 
@@ -22,6 +25,41 @@ describe("inline formatting", () => {
 		});
 		expect(ansi).toContain("\u001b[31minline"); // red
 		expect(ansi).toContain("\u001b[32mblock"); // green
+	});
+
+	it("applies highlighter hook to code blocks", () => {
+		const out = render("```\ncode\n```", {
+			color: true,
+			wrap: false,
+			highlighter: (code) => code.toUpperCase(),
+		});
+		expect(out).toContain("CODE");
+	});
+
+	it("handles line breaks in inline content", () => {
+		const out = strip("Hello\\nworld", { ...noColor, wrap: true, width: 80 });
+		expect(out.split("\n").length).toBeGreaterThan(1);
+	});
+
+	it("keeps hard breaks (two-space newline)", () => {
+		const out = strip("line one  \nline two", {
+			...noColor,
+			wrap: true,
+			width: 80,
+		});
+		expect(out.split("\n").length).toBeGreaterThan(1);
+	});
+
+	it("ignores inline HTML content safely", () => {
+		const out = strip("<div>ignored</div>", { ...noColor });
+		expect(out).toBe("");
+	});
+
+	it("renders headings and horizontal rules", () => {
+		const md = "# Title\n\n---\n";
+		const out = strip(md, { ...noColor, wrap: true, width: 80 });
+		expect(out).toContain("Title");
+		expect(out).toContain("—");
 	});
 });
 
@@ -48,6 +86,14 @@ describe("wrapping", () => {
 		const url = "https://example.com/averylongpathwithoutspaces";
 		const out = strip(url, { ...noColor, width: 10, wrap: true });
 		expect(out).toContain(url);
+	});
+
+	it("wrapText returns empty line when input is empty", () => {
+		expect(wrapText("", 5, true)).toEqual([""]);
+	});
+
+	it("wrapText returns original when width <= 0", () => {
+		expect(wrapText("abc", 0, true)).toEqual(["abc"]);
 	});
 });
 
@@ -144,11 +190,49 @@ describe("hyperlinks", () => {
 		expect(out).not.toContain("\u001B]8;;");
 		expect(out).toContain("x (https://example.com)");
 	});
+
+	it("returns false when supports-hyperlinks stdout is missing", () => {
+		const original = supportsHyperlinks.stdout;
+		// eslint-disable-next-line no-param-reassign
+		supportsHyperlinks.stdout = undefined;
+		try {
+			expect(hyperlinkSupported()).toBe(false);
+			// also cover the true-path call
+			supportsHyperlinks.stdout = () => true;
+			expect(hyperlinkSupported()).toBe(true);
+		} finally {
+			// eslint-disable-next-line no-param-reassign
+			supportsHyperlinks.stdout = original;
+		}
+	});
 });
 
 describe("blockquotes", () => {
 	it("prefixes lines with quote leader", () => {
 		const out = strip("> quoted line", noColor);
 		expect(out.trim().startsWith("│ ")).toBe(true);
+	});
+});
+
+describe("styling helpers", () => {
+	it("applies bold/underline/bg/strike when color enabled", () => {
+		const style = createStyler({ color: true });
+		const styled = style("x", {
+			color: "red",
+			bgColor: "bgBlue",
+			bold: true,
+			underline: true,
+			dim: true,
+			strike: true,
+		});
+		expect(styled).toContain("\u001b[31m"); // red
+		expect(styled).toContain("\u001b[44m"); // bgBlue
+		expect(styled).toContain("\u001b[1m"); // bold
+		expect(styled).toContain("\u001b[9m"); // strike
+	});
+
+	it("returns plain text when color is disabled", () => {
+		const style = createStyler({ color: false });
+		expect(style("plain", { color: "red" })).toBe("plain");
 	});
 });
