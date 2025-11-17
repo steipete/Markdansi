@@ -393,7 +393,10 @@ function renderCodeBlock(node: Code, ctx: RenderContext): string[] {
 		labelRaw.length,
 	);
 	const topPadding = Math.max(0, innerWidth - labelRaw.length);
-	const top = `┌ ${labelStyled}${" ".repeat(topPadding)}┐`;
+	const top =
+		labelRaw.length > 0
+			? `┌ ${labelStyled}${" ".repeat(topPadding)}┐`
+			: `┌ ${"─".repeat(innerWidth)} ┐`;
 	const bottom = `└${"─".repeat(innerWidth + 2)}┘`;
 
 	const boxLines = contentLines.map((ln: string) => {
@@ -456,7 +459,8 @@ function renderLink(node: Link, ctx: RenderContext): string {
 	const label = renderInline(node.children, ctx) || node.url;
 	const url = node.url || "";
 	if (url.startsWith("mailto:")) {
-		return ctx.style(label, ctx.options.theme.link ?? {});
+		// Treat mailto autolinks as plain text to avoid unwanted styling in tables.
+		return label;
 	}
 	if (ctx.options.hyperlinks && url) {
 		return osc8(url, label);

@@ -144,6 +144,24 @@ describe("tables", () => {
 		expect(out).toContain("icon_16x16.png");
 		expect(out).toContain("https://example.com/icon.png");
 	});
+
+	it("keeps mailto-style autolinks plain inside tables", () => {
+		const md = `
+| File | Size |
+| --- | --- |
+| icon_16x16@2x.png | 32 |
+`;
+		const out = strip(md, {
+			...noColor,
+			wrap: true,
+			hyperlinks: true,
+			tableTruncate: false,
+			width: 40,
+		});
+		// Should render as plain text, not OSC-8 or styled link
+		expect(out).toContain("icon_16x16@2x.png");
+		expect(out).not.toContain("\u001B]8;;"); // no OSC hyperlink
+	});
 	it("renders ascii and no-border tables with padding/dense options", () => {
 		const md = `
 | h1 | h2 |
