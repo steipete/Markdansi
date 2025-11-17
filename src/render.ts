@@ -292,6 +292,8 @@ function renderNode(
 			return renderCodeBlock(node, ctx);
 		case "table":
 			return renderTable(node, ctx);
+		case "definition":
+			return renderDefinition(node, ctx);
 		default:
 			return []; // inline handled elsewhere or intentionally skipped
 	}
@@ -304,11 +306,22 @@ function renderParagraph(
 ): string[] {
 	const text = renderInline(node.children, ctx);
 	const prefix = " ".repeat(ctx.options.listIndent * indentLevel);
-	const lines = wrapWithPrefix(
-		text,
-		ctx.options.width ?? 80,
-		ctx.options.wrap,
-		prefix,
+	const rawLines = text.split("\n");
+	const normalized: string[] = [];
+	const defPattern = /^\[[^\]]+]:\s+\S/;
+	for (const line of rawLines) {
+		if (
+			defPattern.test(line) &&
+			normalized.length > 0 &&
+			normalized.at(-1) !== ""
+		) {
+			normalized.push(""); // insert blank line before footer-style definitions
+		}
+		normalized.push(line);
+		if (defPattern.test(line)) normalized.push(""); // and after, for spacing
+	}
+	const lines = normalized.flatMap((l) =>
+		wrapWithPrefix(l, ctx.options.width ?? 80, ctx.options.wrap, prefix),
 	);
 	return lines.map((l) => `${l}\n`);
 }
@@ -408,6 +421,16 @@ function renderListItem(
 	});
 	if (!tight) lines.push("");
 	return lines.map((l) => `${l}\n`);
+}
+
+function renderDefinition(
+	node: Root["children"][number] & { type: "definition" },
+	_ctx: RenderContext,
+): string[] {
+	const title = node.title ? ` "${node.title}"` : "";
+	const line = `[${node.identifier}]: ${node.url ?? ""}${title}`;
+	// Insert a leading blank line to visually separate footers from body.
+	return [`\n${line}\n`];
 }
 
 function renderCodeBlock(node: Code, ctx: RenderContext): string[] {

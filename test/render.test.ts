@@ -437,6 +437,17 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 		expect(out).toContain(`[1]: https://example.com/icon "`);
 		expect(out).toContain("Icon Composer Notes");
 	});
+
+	it("separates definitions with a blank line footer-style", () => {
+		const md = `Body line.\n[1]: https://example.com "Title"\nNext.`;
+		const out = render(md, { color: false, wrap: true });
+		const lines = out.split("\n");
+		expect(lines[0]).toBe("Body line.");
+		expect(lines[1]).toBe(""); // blank line before definition
+		expect(lines[2]).toBe('[1]: https://example.com "Title"');
+		expect(lines[3]).toBe(""); // blank line after definition
+		expect(lines[4]).toBe("Next.");
+	});
 });
 
 describe("cli stdout EPIPE handling", () => {
