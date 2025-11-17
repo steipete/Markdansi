@@ -11,6 +11,11 @@
 - Added CLI flags for table/code options; expanded tests for tables/code/gutter/theme defaults.
 - Docs/spec/README updated; publish as `markdansi@0.1.1` on npm.
 
+## 0.1.2 (unreleased)
+
+### Planned
+- TBD
+
 ## 0.1.0 (2025-11-16)
 
 ### Highlights
