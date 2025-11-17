@@ -10,6 +10,7 @@
 - Migrated source/tests to TypeScript; package is ESM (NodeNext). `prepare` runs full compile to `dist/`.
 - Added CLI flags for table/code options; expanded tests for tables/code/gutter/theme defaults.
 - Docs/spec/README updated; publish as `markdansi@0.1.1` on npm.
+- Code box header now embeds `[lang]` label in the top border; added tests for long labels, no-label cases, and gutters.
 
 ## 0.1.2 (unreleased)
 
