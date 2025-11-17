@@ -5,7 +5,6 @@
 ### Highlights
 - Normalize link/reference definitions that spill titles onto indented lines so they render as plain text instead of boxed code (fixes pasted blog footnotes).
 - Code box headers now pad with dashes when the label is shorter than the body line length; added regression coverage.
-- Added tests covering footnote-style continuations and header padding; ensured docs/README/spec mention the behavior.
 - Reference blocks now render with a single blank line before the first definition and no extra blank lines between entries, matching common Markdown viewers.
 
 ## 0.1.1 (2025-11-17)
