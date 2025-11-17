@@ -16,9 +16,11 @@
 	"scripts": {
 		"build": "pnpm lint && pnpm test",
 		"clean": "rm -rf dist",
-		"lint": "biome check .",
+		"lint": "rm -rf dist && biome check .",
 		"test": "vitest run",
-		"test:coverage": "vitest run --coverage"
+		"test:coverage": "vitest run --coverage",
+		"types": "tsc -p tsconfig.json",
+		"prepare": "pnpm types"
 	},
 	"keywords": [
 		"markdown",
@@ -42,12 +44,15 @@
 	"sideEffects": false,
 	"files": [
 		"src",
+		"dist",
 		"README.md",
 		"docs/spec.md",
 		"package.json",
 		"tsconfig.json",
-		".biome.json"
+		".biome.json",
+		"types"
 	],
+	"types": "dist/index.d.ts",
 	"dependencies": {
 		"chalk": "^5.6.2",
 		"mdast-util-from-markdown": "^2.0.2",
@@ -62,6 +67,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.5",
 		"@vitest/coverage-v8": "^4.0.9",
+		"typescript": "^5.9.3",
 		"vitest": "^4.0.9"
 	}
 }

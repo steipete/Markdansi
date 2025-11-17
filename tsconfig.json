@@ -6,11 +6,14 @@
 		"noPropertyAccessFromIndexSignature": true,
 		"allowJs": true,
 		"checkJs": true,
-		"module": "ESNext",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
+		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
 		"target": "ES2022",
 		"resolveJsonModule": true
 	},
-	"include": ["src/**/*", "test/**/*", "docs/**/*"],
-	"exclude": ["node_modules", "dist"]
+	"include": ["types/**/*.ts"],
+	"exclude": ["node_modules", "dist", "coverage"]
 }
