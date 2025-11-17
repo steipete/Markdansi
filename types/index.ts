@@ -1,3 +1,7 @@
+// Public API typings for Markdansi.
+// Hand-authored source for `pnpm types` (tsc --emitDeclarationOnly)
+// to produce dist/index.d.ts. Keep in sync with src/ changes.
+
 export type ColorName =
 	| "black"
 	| "red"
