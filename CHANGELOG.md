@@ -8,7 +8,7 @@
 - Types now come from source; removed separate `types/` shim.
 - Added tests for table borders/padding/dense/truncate, code gutters/wrap box toggles, theme colors, and CLI flags.
 
-## 0.1.1 (2025-11-17)
+## 0.1.1 (about to release)
 
 ### Highlights
 - Prettier defaults: tables truncate to fit with `…`, code blocks wrap to width, and unicode table borders remain on by default.
