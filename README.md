@@ -29,6 +29,7 @@ markdansi [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-li
 
 ```js
 import { render, createRenderer, strip } from 'markdansi';
+import { createStyler } from 'markdansi/src/theme.js'; // custom theme building (optional)
 
 const ansi = render('# Hello **world**', { width: 60 });
 
@@ -37,6 +38,17 @@ const out = renderNoWrap('A very long line...');
 
 // Plain text (no ANSI/OSC)
 const plain = strip('link to [x](https://example.com)');
+
+// Custom theme and highlighter hook
+const custom = createRenderer({
+  theme: {
+    ...require('markdansi/src/theme.js').themes.default,
+    inlineCode: { color: 'red' },
+    blockCode: { color: 'green' },
+  },
+  highlighter: (code, lang) => code.toUpperCase(),
+});
+console.log(custom('`inline`\n\n```\nblock code\n```'));
 ```
 
 ### Options

@@ -39,6 +39,15 @@
 	"homepage": "https://github.com/steipete/Markdansi#readme",
 	"author": "",
 	"license": "MIT",
+	"sideEffects": false,
+	"files": [
+		"src",
+		"README.md",
+		"docs/spec.md",
+		"package.json",
+		"tsconfig.json",
+		".biome.json"
+	],
 	"dependencies": {
 		"chalk": "^5.6.2",
 		"mdast-util-from-markdown": "^2.0.2",
