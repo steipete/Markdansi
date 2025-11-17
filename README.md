@@ -1,5 +1,3 @@
-# Markdansi
-
 # 🎨 Markdansi: Wraps, colors, links—no baggage.
 ![npm](https://img.shields.io/npm/v/markdansi) ![license MIT](https://img.shields.io/badge/license-MIT-blue.svg) ![node >=22](https://img.shields.io/badge/node-%3E%3D22-brightgreen) ![tests vitest](https://img.shields.io/badge/tests-vitest-blue?logo=vitest)
 
