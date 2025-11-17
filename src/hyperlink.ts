@@ -9,8 +9,20 @@ export function hyperlinkSupported(
 ): boolean {
 	const helper = supportsHyperlinks as unknown as {
 		stdout?: (s: WriteStream) => boolean;
+		default?: (s: WriteStream) => boolean;
 	};
-	if (helper.stdout) return helper.stdout(stream);
+	try {
+		if (typeof supportsHyperlinks === "function") {
+			return Boolean(
+				(supportsHyperlinks as (s: WriteStream) => boolean)(stream),
+			);
+		}
+		if (helper.stdout) return Boolean(helper.stdout(stream));
+		if (helper.default && typeof helper.default === "function")
+			return Boolean(helper.default(stream));
+	} catch {
+		return false;
+	}
 	return false;
 }
 
