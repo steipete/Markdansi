@@ -183,7 +183,125 @@ function normalizeNodes(tree: Root): Root {
 		if (node) normalized.push(node);
 	}
 
-	return { ...tree, children: normalized };
+	const mergedCodes = mergeAdjacentCodeBlocks(normalized);
+	const taggedDiffs = mergedCodes.map((child) =>
+		tagDiffBlock(child),
+	) as Root["children"];
+	return { ...tree, children: taggedDiffs };
+}
+
+function flattenCodeList(list: List): Code | null {
+	if (
+		!list.children.length ||
+		!list.children.every(
+			(item) =>
+				item.children.length === 1 &&
+				item.children[0]?.type === "code" &&
+				(item.children[0] as Code).value !== undefined,
+		)
+	)
+		return null;
+
+	const codes = list.children.map((item) => item.children[0] as Code);
+	const sameLang = codes.every((c) => c.lang === codes[0]?.lang);
+	const lang = sameLang ? (codes[0]?.lang ?? undefined) : undefined;
+
+	return {
+		type: "code",
+		lang: lang ?? undefined,
+		value: codes.map((c) => c.value).join("\n"),
+		position: list.position,
+	};
+}
+
+function mergeAdjacentCodeBlocks(nodes: Root["children"]): Root["children"] {
+	const out: Root["children"] = [];
+	let pending: Code | null = null;
+
+	const flush = () => {
+		if (pending) {
+			out.push(pending);
+			pending = null;
+		}
+	};
+
+	for (const node of nodes) {
+		if (node?.type === "code") {
+			if (
+				pending &&
+				(pending.lang === node.lang || (!pending.lang && !node.lang))
+			) {
+				const nextValue: string = `${pending.value}\n${node.value}`;
+				pending = {
+					type: "code",
+					lang: pending.lang,
+					meta: pending.meta,
+					value: nextValue,
+					position: pending.position,
+				};
+			} else {
+				flush();
+				pending = node as Code;
+			}
+			continue;
+		}
+
+		if (node?.type === "list") {
+			const flattened = flattenCodeList(node);
+			if (flattened) {
+				if (
+					pending &&
+					(pending.lang === flattened.lang ||
+						(!pending.lang && !flattened.lang))
+				) {
+					const nextValue: string = `${pending.value}\n${flattened.value}`;
+					pending = {
+						type: "code",
+						lang: pending.lang,
+						meta: pending.meta,
+						value: nextValue,
+						position: pending.position,
+					};
+				} else {
+					flush();
+					pending = flattened;
+				}
+				continue;
+			}
+		}
+
+		flush();
+		out.push(node);
+	}
+	flush();
+	return out;
+}
+
+function looksLikeDiff(text: string): boolean {
+	const lines = text.split("\n").map((l) => l.trim());
+	if (
+		lines.some(
+			(l) =>
+				l.startsWith("diff --git") ||
+				l.startsWith("--- a/") ||
+				l.startsWith("+++ b/") ||
+				l.startsWith("@@ "),
+		)
+	)
+		return true;
+	const nonEmpty = lines.filter((l) => l !== "");
+	if (nonEmpty.length < 3) return false;
+	const markers = nonEmpty.filter((l) => /^[+\-@]/.test(l)).length;
+	return markers >= Math.max(3, Math.ceil(nonEmpty.length * 0.6));
+}
+
+function tagDiffBlock(
+	node: Root["children"][number],
+): Root["children"][number] {
+	if (node?.type === "code" && !node.lang && looksLikeDiff(node.value)) {
+		return { ...(node as Code), lang: "diff" };
+	}
+	return node;
 }
 
 const HR_WIDTH = 40;
@@ -446,12 +564,15 @@ function renderDefinition(
 function renderCodeBlock(node: Code, ctx: RenderContext): string[] {
 	const theme = ctx.options.theme.blockCode || ctx.options.theme.inlineCode;
 	const lines = (node.value ?? "").split("\n");
+	const isDiff = node.lang === "diff";
 	const gutterWidth = ctx.options.codeGutter
 		? String(lines.length).length + 2
 		: 0;
-	const boxPadding = ctx.options.codeBox ? 4 : 0;
+	const shouldWrap = isDiff ? false : ctx.options.codeWrap;
+	const useBox = ctx.options.codeBox && lines.length > 1;
+	const boxPadding = useBox ? 4 : 0;
 	const wrapLimit =
-		ctx.options.codeWrap && ctx.options.wrap && ctx.options.width
+		shouldWrap && ctx.options.wrap && ctx.options.width
 			? Math.max(1, ctx.options.width - boxPadding - gutterWidth)
 			: undefined; // undefined => no hard wrap limit
 	const contentLines = lines.flatMap((line: string, idx: number) => {
@@ -470,7 +591,7 @@ function renderCodeBlock(node: Code, ctx: RenderContext): string[] {
 		});
 	});
 
-	if (!ctx.options.codeBox) {
+	if (!useBox) {
 		return [`${contentLines.join("\n")}\n\n`];
 	}
 

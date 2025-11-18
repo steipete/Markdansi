@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 (2025-11-18)
+
+### Highlights
+- Collapse bulletized/fenced lists of code blocks into a single block to avoid per-line boxes in chatty patches.
+- Auto-tag unfenced diffs (`diff --git` / `--- a/` / `@@`) and render them as `diff` code blocks without wrapping so alignment stays intact.
+- Render single-line code blocks without a surrounding box; multi-line blocks keep boxes.
+- Added regression tests for code-list collapsing, diff detection/no-wrap, and single-line unboxed rendering.
+
 ## 0.1.2 (2025-11-17)
 
 ### Highlights

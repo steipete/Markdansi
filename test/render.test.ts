@@ -385,8 +385,9 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 		expect(stripAnsi(out)).toContain("12 ");
 	});
 
-	it("renders language label in code box header", () => {
-		const md = "```bash\nthis line is definitely longer than the label\n```";
+	it("renders language label in code box header (multi-line only)", () => {
+		const md =
+			"```bash\nthis line is definitely longer than the label\nand still flows\n```";
 		const out = render(md, { color: true, wrap: false });
 		const firstLineRaw = out.split("\n")[0];
 		const bodyLine = out.split("\n")[1];
@@ -404,7 +405,7 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 	});
 
 	it("omits label when language is absent", () => {
-		const md = "```\nfoo\n```";
+		const md = "```\nfoo\nbar\n```";
 		const out = render(md, { color: false, wrap: false });
 		const firstLine = out.split("\n")[0];
 		expect(firstLine.startsWith("┌")).toBe(true);
@@ -412,7 +413,7 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 	});
 
 	it("keeps header width when label is long", () => {
-		const md = "```superlonglanguageid\nfoo\n```";
+		const md = "```superlonglanguageid\nfoo\nbar\n```";
 		const out = render(md, { color: false, wrap: false });
 		const lines = out.split("\n");
 		const top = lines[0];
@@ -425,7 +426,7 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 	});
 
 	it("does not emit blank line before boxed code", () => {
-		const md = "```bash\nfoo\n```";
+		const md = "```bash\nfoo\nbar\n```";
 		const out = render(md, { color: false, wrap: false });
 		expect(out.startsWith("┌")).toBe(true);
 	});
@@ -447,6 +448,33 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
 		expect(lines[2]).toBe('[1]: https://example.com "Title"');
 		expect(lines[3]).toBe("Next.");
 		expect(lines[4]).toBe(""); // final newline
+	});
+
+	it("collapses lists of code blocks into a single block", () => {
+		const md = "- ```\n  first\n  ```\n- ```\n  second\n  ```";
+		const out = render(md, { color: false, wrap: false });
+		const boxes = (out.match(/┌/g) ?? []).length;
+		expect(boxes).toBe(1);
+		expect(out).toContain("first");
+		expect(out).toContain("second");
+	});
+
+	it("tags unfenced diffs and skips wrapping them", () => {
+		const md =
+			"```\n--- a/foo\n+++ b/foo\n@@ -1 +1 @@\n- a very very very very long line\n+ another very very very very long line\n```";
+		const out = render(md, { color: false, wrap: true, width: 20 });
+		expect(out).toContain("[diff]");
+		const minusLine = out
+			.split("\n")
+			.find((l) => l.includes("very very very very long line"));
+		expect(minusLine?.length).toBeGreaterThan(30);
+	});
+
+	it("renders single-line code blocks without a box", () => {
+		const md = "```\nsolo\n```";
+		const out = render(md, { color: false, wrap: false });
+		expect(out.startsWith("┌")).toBe(false);
+		expect(out.trim()).toBe("solo");
 	});
 });
 

@@ -50,6 +50,39 @@ const custom = createRenderer({
   highlighter: (code, lang) => code.toUpperCase(),
 });
 console.log(custom('`inline`\n\n```\nblock code\n```'));
+
+// Example: real syntax highlighting with Shiki (TS + Swift)
+import { bundledLanguages, bundledThemes, createHighlighter } from 'shiki';
+
+const shiki = await createHighlighter({
+  themes: [bundledThemes['github-dark']],
+  langs: [bundledLanguages.typescript, bundledLanguages.swift],
+});
+
+const highlighted = createRenderer({
+  highlighter: (code, lang) => {
+    if (!lang) return code;
+    const normalized = lang.toLowerCase();
+    if (!['ts', 'typescript', 'swift'].includes(normalized)) return code;
+    const { tokens } = shiki.codeToTokens(code, {
+      lang: normalized === 'swift' ? 'swift' : 'ts',
+      theme: 'github-dark',
+    });
+    return tokens
+      .map((line) =>
+        line
+          .map((token) =>
+            token.color ? `\u001b[38;2;${parseInt(token.color.slice(1, 3), 16)};${parseInt(
+              token.color.slice(3, 5),
+              16,
+            )};${parseInt(token.color.slice(5, 7), 16)}m${token.content}\u001b[39m` : token.content,
+          )
+          .join(''),
+      )
+      .join('\n');
+  },
+});
+console.log(highlighted('```ts\nconst x: number = 1\n```\n```swift\nlet x = 1\n```'));
 ```
 
 ### Options
