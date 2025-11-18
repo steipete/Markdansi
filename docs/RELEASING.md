@@ -12,8 +12,11 @@ This merges the checklist and the running release log into one file for convenie
 - Tag: `git tag v<version>`.
 - Push: `git push && git push --tags`.
 - Publish: optional dry-run `npm publish --dry-run`, then `npm publish`.
+- GitHub release (required for every tag):
+  - Title: `Markdansi <version>`.
+  - Body: paste the matching `CHANGELOG` section as bullets.
+  - Assets: GitHub auto-attaches `Source code (zip|tar.gz)` for the tag. Optionally upload `markdansi-<version>.tgz` from `npm pack` and SHA256/SHA1 checksums if desired.
 - Post-publish: `npm view markdansi version`; quick CLI check `pnpm dlx markdansi --help` (or `npx markdansi --help`); sample render `pnpm markdansi -- --in README.md --no-wrap`.
-- Create GitHub release with title `Markdansi <version>` and paste the matching changelog bullets; visually confirm formatting.
 
 ## Release log
 
