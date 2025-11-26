@@ -1,4 +1,9 @@
 # 🎨 Markdansi: Wraps, colors, links—no baggage.
+
+<p align="center">
+  <img src="./markdansi.png" alt="Markdansi README header" width="1100">
+</p>
+
 ![npm](https://img.shields.io/npm/v/markdansi) ![license MIT](https://img.shields.io/badge/license-MIT-blue.svg) ![node >=22](https://img.shields.io/badge/node-%3E%3D22-brightgreen) ![tests vitest](https://img.shields.io/badge/tests-vitest-blue?logo=vitest)
 
 Tiny, dependency-light Markdown → ANSI renderer and CLI for modern Node (>=22). Focuses on readable terminal output with sensible wrapping, GFM support (tables, task lists, strikethrough), optional OSC‑8 hyperlinks, and zero built‑in syntax highlighting (pluggable hook). Written in TypeScript, ships ESM.
