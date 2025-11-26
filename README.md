@@ -123,4 +123,6 @@ License: MIT
 - Tables use unicode borders by default, include padding, respect GFM alignment, and truncate long cells with `…` so layouts stay tidy. Turn off truncation with `tableTruncate=false`.
 - Tight vs loose lists follow GFM; task items render `[ ]` / `[x]`.
 
-See `docs/spec.md` for full behavior details.*** End Patch
+See `docs/spec.md` for full behavior details.
+
+Looking for the Swift port? Check out [Swiftdansi](https://github.com/steipete/Swiftdansi).
