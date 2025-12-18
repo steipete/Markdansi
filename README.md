@@ -120,7 +120,7 @@ console.log(highlighted('```ts\nconst x: number = 1\n```\n```swift\nlet x = 1\n`
 
 ## Status
 
-Version: `0.1.3` (released)  
+Version: `0.1.4` (released)  
 Tests: `pnpm test`  
 License: MIT
 

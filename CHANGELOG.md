@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.4 (Unreleased)
+## 0.1.4 (2025-12-18)
 
 ### Highlights
 - Fix TSX/CommonJS consumers failing to resolve the package export by adding a `default` export condition (issue #1).
@@ -18,6 +18,7 @@
 ### Highlights
 - Normalize link/reference definitions that spill titles onto indented lines so they render as plain text instead of boxed code (fixes pasted blog footnotes).
 - Code box headers now pad with dashes when the label is shorter than the body line length; added regression coverage.
+- Added tests covering footnote-style continuations and header padding; ensured docs/README/spec mention the behavior.
 - Reference blocks now render with a single blank line before the first definition and no extra blank lines between entries, matching common Markdown viewers.
 
 ## 0.1.1 (2025-11-17)
@@ -31,14 +32,6 @@
 - Added CLI flags for table/code options; expanded tests for tables/code/gutter/theme defaults.
 - Docs/spec/README updated; published as `markdansi@0.1.1` on npm.
 - Code box header now embeds `[lang]` label in the top border; added tests for long labels, no-label cases, and gutters.
-
-## 0.1.2 (2025-11-17)
-
-### Highlights
-- Normalize link/reference definitions that spill titles onto indented lines so they render as plain text instead of boxed code (fixes pasted blog footnotes).
-- Code box headers now pad with dashes when the label is shorter than the body line length; added regression coverage.
-- Added tests covering footnote-style continuations and header padding; ensured docs/README/spec mention the behavior.
-- Reference blocks now render with a single blank line before the first definition and no extra blank lines between entries, matching common Markdown viewers.
 
 ## 0.1.0 (2025-11-16)
 
