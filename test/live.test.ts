@@ -16,7 +16,7 @@ describe("live renderer", () => {
 		const out = writes.join("");
 		expect(out).toContain("\u001b[?2026h");
 		expect(out).toContain("\u001b[?2026l");
-		expect(out).toContain("\u001b[2K");
+		expect(out).toContain("\u001b[0J");
 		expect(out).toContain("\u001b[?25l");
 		expect(out).toContain("\u001b[?25h");
 		expect(out).toContain("\u001b[1A\r");
@@ -31,7 +31,8 @@ describe("live renderer", () => {
 
 		live.render("hello");
 
-		expect(writes[0]).not.toMatch(/\u001b\[\d+A/);
+		expect(writes[0]).not.toContain("\u001b[1A");
+		expect(writes[0]).not.toContain("\u001b[2A");
 		expect(writes[0]).toContain("\r");
 	});
 
@@ -49,7 +50,7 @@ describe("live renderer", () => {
 		const out = writes.join("");
 		expect(out).not.toContain("\u001b[?2026h");
 		expect(out).not.toContain("\u001b[?2026l");
-		expect(out).toContain("\u001b[2K");
+		expect(out).toContain("\u001b[0J");
 	});
 
 	it("can disable cursor hiding", () => {
@@ -79,7 +80,7 @@ describe("live renderer", () => {
 		live.render("a");
 		live.render("a\nb");
 
-		expect(writes[2]).toContain("\u001b[3A\r");
+		expect(writes[2]).toContain("\u001b[1A\r");
 	});
 
 	it("clears removed lines when the frame shrinks", () => {
@@ -94,8 +95,8 @@ describe("live renderer", () => {
 
 		const second = writes[1];
 		expect(second).toContain("\u001b[3A\r");
-		expect((second.match(/\u001b\[2K/g) ?? []).length).toBe(3);
-		expect(second).toContain("a\n");
+		expect(second).toContain("\u001b[0J");
+		expect(second).toContain("a\r\n");
 		expect(second).not.toContain("b");
 		expect(second).not.toContain("c");
 	});
@@ -109,7 +110,7 @@ describe("live renderer", () => {
 
 		live.render("ignored");
 
-		expect(writes[0]).toContain("\u001b[2Kx\n");
+		expect(writes[0]).toContain("\u001b[0J\rx\r\n");
 	});
 
 	it("finish is a no-op if cursor was never hidden", () => {
