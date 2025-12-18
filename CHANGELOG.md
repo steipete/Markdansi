@@ -1,9 +1,11 @@
 # Changelog
 
-## 0.1.5 (2025-12-18)
+## 0.1.5 (Unreleased)
 
 ### Highlights
 - Add a live in-place renderer (`createLiveRenderer`) that can re-render markdown streams with synchronized output framing.
+- Fix live redraw correctness for wrapped lines via row-aware cursor movement.
+- Expand test coverage for live rendering edge cases (shrink/clear, cursor hide, newline normalization).
 
 ## 0.1.4 (2025-12-18)
 
