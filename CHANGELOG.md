@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.7 (Unreleased)
+## 0.1.7 (2025-12-19)
 
 - Avoid orphaned trailing articles/prepositions at the end of wrapped lines.
 

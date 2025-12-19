@@ -29,6 +29,7 @@ This merges the checklist and the running release log into one file for convenie
 
 | Version | Date (UTC) | Actions | Notes |
 | --- | --- | --- | --- |
+| 0.1.7 | 2025-12-19 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.7`, `git push --tags`, `gh release create v0.1.7` | Avoid orphaned trailing articles/prepositions when wrapping. |
 | 0.1.6 | 2025-12-19 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.6`, `git push --tags`, `gh release create v0.1.6` | Collapse soft line breaks in paragraphs/lists; preserve hard breaks; more tests. |
 | 0.1.5 | 2025-12-18 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.5`, `git push --tags`, `gh release create v0.1.5` | Live in-place renderer (`createLiveRenderer`) + row-aware redraw + more tests. |
 | 0.1.4 | 2025-12-18 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.4`, `git push --tags`, `gh release create v0.1.4` | Export fallback for TSX/CJS resolution (`default`), plus docs note. |
