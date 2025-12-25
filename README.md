@@ -55,12 +55,14 @@ For streaming output (LLM responses, logs, progress), use `createLiveRenderer` t
 import { createLiveRenderer, render } from 'markdansi';
 
 const rows = process.stdout.rows ?? 24;
+const maxRows = Math.max(1, rows - 1);
+const tailRows = Math.min(maxRows, Math.max(8, Math.min(24, Math.floor(rows / 2))));
 const live = createLiveRenderer({
   renderFrame: (markdown) => render(markdown),
   write: process.stdout.write.bind(process.stdout),
   width: process.stdout.columns ?? 80,
-  tailRows: Math.max(12, rows - 2),
-  maxRows: rows,
+  tailRows,
+  maxRows,
   onOverflow: () => {
     // Stop live rendering and fall back to a final print.
   },
@@ -77,7 +79,7 @@ live.finish();
 
 Notes:
 - **Full-frame redraw** (no `tailRows`) is fine for short output, but can duplicate scrollback while streaming.
-- **`maxRows`** lets you stop live updates once output would exceed the viewport.
+- **`maxRows`** should stay below the terminal height (reserve 1 row for the trailing newline).
 - **`clearScrollbackOnOverflow`** is destructive (clears history). Use only if you want a “TUI-like” reset.
 - For a true full-screen experience, manage the alternate screen buffer (`CSI ?1049h/l`) in your app.
 
