@@ -47,21 +47,24 @@ console.log(render('# hello'));
 ```
 
 ### Live streaming / in-place rendering
-For streaming output (LLM responses, logs, progress), use `createLiveRenderer` to re-render and redraw in-place. Uses terminal “synchronized output” when supported.
+For streaming output (LLM responses, logs, progress), use `createLiveRenderer` to redraw in-place. Terminals do **not** expose scrollback/viewport state, so full-frame redraws can spam scrollback while the user scrolls.
+
+**Recommended: tail mode** — re-render only the last N visual rows. This keeps scrollback clean and avoids duplicate frames.
 
 ```js
 import { createLiveRenderer, render } from 'markdansi';
 
+const rows = process.stdout.rows ?? 24;
 const live = createLiveRenderer({
   renderFrame: (markdown) => render(markdown),
   write: process.stdout.write.bind(process.stdout),
-  maxRows: process.stdout.rows,
-  tailRows: Math.max(12, (process.stdout.rows ?? 24) - 2),
-  onOverflow: ({ rows, maxRows }) => {
+  width: process.stdout.columns ?? 80,
+  tailRows: Math.max(12, rows - 2),
+  maxRows: rows,
+  onOverflow: () => {
     // Stop live rendering and fall back to a final print.
   },
   clearOnOverflow: true,
-  clearScrollbackOnOverflow: true,
 });
 
 let buffer = '';
@@ -71,6 +74,12 @@ buffer += '\\nMore…\\n';
 live.render(buffer);
 live.finish();
 ```
+
+Notes:
+- **Full-frame redraw** (no `tailRows`) is fine for short output, but can duplicate scrollback while streaming.
+- **`maxRows`** lets you stop live updates once output would exceed the viewport.
+- **`clearScrollbackOnOverflow`** is destructive (clears history). Use only if you want a “TUI-like” reset.
+- For a true full-screen experience, manage the alternate screen buffer (`CSI ?1049h/l`) in your app.
 
 ```js
 import { render, createRenderer, strip, themes } from 'markdansi';
