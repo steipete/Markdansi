@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.3.0 (Unreleased)
+## 0.3.1 (Unreleased)
+
+- Streaming: normalize fragment rendering to avoid double blank lines in scrollback-safe mode.
+
+## 0.3.0 (2025-12-26)
 
 - **Streaming (hybrid blocks):** add `createMarkdownStreamer()` for append-only, scrollback-safe streaming.
 - **Breaking:** remove the old in-place `createLiveRenderer` (cursor/diff/tail mode).
