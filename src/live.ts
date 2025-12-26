@@ -2,7 +2,7 @@ import stringWidth from "string-width";
 
 export type LiveRenderer = {
 	render: (input: string) => void;
-	finish: () => void;
+	finish: (final?: string) => void;
 };
 
 export type LiveRendererOptions = {
@@ -371,7 +371,40 @@ export function createLiveRenderer(options: LiveRendererOptions): LiveRenderer {
 		previousLineHeights = nextHeights;
 	};
 
-	const finish = () => {
+	const finish = (final?: string) => {
+		if (typeof final === "string") {
+			// Render the full frame (ignore tailRows) before restoring cursor visibility.
+			const renderedRaw = options.renderFrame(final);
+			const rendered = renderedRaw.endsWith("\n")
+				? renderedRaw
+				: `${renderedRaw}\n`;
+			const rawLines = rendered.split("\n");
+			if (rawLines.length > 0 && rawLines.at(-1) === "") rawLines.pop();
+			if (rawLines.length === 0) rawLines.push("");
+			const rawHeights = measureLines(rawLines);
+			const totalRows = sumRows(rawHeights);
+			const nextLines = rawLines;
+			const nextHeights = rawHeights;
+			const nextRows = totalRows;
+			let frame = "";
+			if (hideCursor && !cursorHidden) {
+				frame += HIDE_CURSOR;
+				cursorHidden = true;
+			}
+			if (synchronizedOutput) frame += BSU;
+			frame += cursorRow > 0 ? `${cursorUp(cursorRow)}\r` : "\r";
+			frame += CLEAR_TO_END;
+			for (let i = 0; i < nextLines.length; i += 1) {
+				frame += "\r";
+				frame += nextLines[i];
+				frame += "\r\n";
+			}
+			if (synchronizedOutput) frame += ESU;
+			options.write(frame);
+			cursorRow = nextRows;
+			previousLines = nextLines;
+			previousLineHeights = nextHeights;
+		}
 		if (hideCursor && cursorHidden) {
 			options.write(SHOW_CURSOR);
 			cursorHidden = false;
