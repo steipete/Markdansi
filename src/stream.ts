@@ -101,6 +101,7 @@ export function createMarkdownStreamer(
 
 	let buffer = "";
 	let blankStreak = 0;
+	let started = false;
 
 	let heldTableHeader: string | null = null;
 	let inTable = false;
@@ -110,6 +111,7 @@ export function createMarkdownStreamer(
 	let fenceBuffer = "";
 
 	const emitBlankLine = () => {
+		if (!started) return "";
 		if (spacing === "tight") return "";
 		if (spacing === "single" && blankStreak >= 1) return "";
 		blankStreak += 1;
@@ -119,6 +121,7 @@ export function createMarkdownStreamer(
 	const emitRendered = (markdown: string) => {
 		if (!markdown) return "";
 		blankStreak = 0;
+		started = true;
 		return normalizeRenderedFragment(render(markdown));
 	};
 
@@ -243,6 +246,7 @@ export function createMarkdownStreamer(
 	const reset = () => {
 		buffer = "";
 		blankStreak = 0;
+		started = false;
 		heldTableHeader = null;
 		inTable = false;
 		tableBuffer = "";
