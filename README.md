@@ -46,9 +46,32 @@ const { render } = await import('markdansi');
 console.log(render('# hello'));
 ```
 
-### Streaming (recommended: line-based)
-If you’re streaming Markdown (LLM output), keep scrollback safe by emitting **complete lines only**.
-Buffer until `\n`, then render each line independently and write it once.
+### Streaming (recommended: hybrid blocks)
+If you’re streaming Markdown (LLM output), keep scrollback safe by emitting **completed fragments only**
+and writing them once (append-only; no in-place redraw).
+
+Hybrid mode streams regular lines as they complete, but buffers multi-line constructs that need context:
+- Fenced code blocks (``` / ~~~) — flushed only after the closing fence
+- Tables — flushed only after the header separator row + until the table ends
+
+```js
+import { createMarkdownStreamer, render } from 'markdansi';
+
+const streamer = createMarkdownStreamer({
+  render: (md) => render(md, { width: process.stdout.columns ?? 80 }),
+  spacing: 'single', // collapse consecutive blank lines
+});
+
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', (delta) => {
+  const chunk = streamer.push(delta);
+  if (chunk) process.stdout.write(chunk);
+});
+process.stdin.on('end', () => {
+  const tail = streamer.finish();
+  if (tail) process.stdout.write(tail);
+});
+```
 
 ```js
 import { render, createRenderer, strip, themes } from 'markdansi';

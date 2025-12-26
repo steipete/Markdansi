@@ -1,9 +1,9 @@
 # Changelog
 
-## 0.2.0 (Unreleased)
+## 0.3.0 (Unreleased)
 
-- Remove `createLiveRenderer` in favor of scrollback-safe, line-based streaming in callers.
-- Drop live-renderer terminal integration tests (in-place redraw is fragile across terminals).
+- **Streaming (hybrid blocks):** add `createMarkdownStreamer()` for append-only, scrollback-safe streaming.
+- **Breaking:** remove the old in-place `createLiveRenderer` (cursor/diff/tail mode).
 
 ## 0.1.7 (2025-12-19)
 

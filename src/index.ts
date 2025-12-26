@@ -1,8 +1,14 @@
 import { createRenderer, render as renderMarkdown } from "./render.js";
+import { createMarkdownStreamer } from "./stream.js";
 import { themes } from "./theme.js";
 import type { RenderOptions, Theme, ThemeName } from "./types.js";
 
-export { createRenderer, renderMarkdown as render, themes };
+export {
+	createMarkdownStreamer,
+	createRenderer,
+	renderMarkdown as render,
+	themes,
+};
 export type { RenderOptions, Theme, ThemeName };
 
 /**
