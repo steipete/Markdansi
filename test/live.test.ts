@@ -180,6 +180,40 @@ describe("live renderer", () => {
 		expect(last).not.toContain("a\r\n");
 	});
 
+	it("does not overflow based on full height when tailRows is set", () => {
+		const writes: string[] = [];
+		let overflow: { rows: number; maxRows: number } | null = null;
+		const live = createLiveRenderer({
+			write: (chunk) => writes.push(chunk),
+			renderFrame: (input) => input,
+			tailRows: 2,
+			maxRows: 2,
+			onOverflow: (info) => {
+				overflow = info;
+			},
+		});
+
+		live.render("a\nb\nc\n");
+
+		expect(overflow).toBeNull();
+	});
+
+	it("ignores appendWhenPossible when tailRows is set", () => {
+		const writes: string[] = [];
+		const live = createLiveRenderer({
+			write: (chunk) => writes.push(chunk),
+			renderFrame: (input) => input,
+			tailRows: 2,
+			appendWhenPossible: true,
+		});
+
+		live.render("hello\n");
+		live.render("hello\nworld\n");
+
+		expect(writes[0]).toContain("\u001b[0J");
+		expect(writes[1]).toContain("\u001b[0J");
+	});
+
 	it("appends when the rendered frame grows by prefix", () => {
 		const writes: string[] = [];
 		const live = createLiveRenderer({

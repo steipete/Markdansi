@@ -7,6 +7,7 @@
 - Make live rendering diff-aware so only changed lines are updated, reducing scrollback churn.
 - Allow `finish(final)` to render the full frame after tail rendering (avoid truncated final output).
 - Add `appendWhenPossible` to grow scrollback when frames are prefix-appends.
+- Fix tail mode overflow accounting (use drawn rows) and ignore `appendWhenPossible` in tail mode.
 
 ## 0.1.7 (2025-12-19)
 

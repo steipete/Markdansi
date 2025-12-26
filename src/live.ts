@@ -102,7 +102,9 @@ export function createLiveRenderer(options: LiveRendererOptions): LiveRenderer {
 			: null;
 	const clearOnOverflow = options.clearOnOverflow !== false;
 	const clearScrollbackOnOverflow = options.clearScrollbackOnOverflow === true;
-	const appendWhenPossible = options.appendWhenPossible === true;
+	// appendWhenPossible breaks tail mode invariants (cursorRow/overwrite region),
+	// because appending grows the terminal buffer while tail mode assumes a fixed region.
+	const appendWhenPossible = options.appendWhenPossible === true && !tailRows;
 	let previousRenderedRaw = "";
 
 	const extractAnsiToken = (
@@ -292,11 +294,14 @@ export function createLiveRenderer(options: LiveRendererOptions): LiveRenderer {
 			return;
 		}
 
-		if (maxRows && totalRows > maxRows && !overflowed) {
+		// In tail mode we only ever draw `nextRows` (tailRows-limited), so overflow should be
+		// based on the visible/drawn rows, not the full rendered height.
+		const overflowRows = tailRows ? nextRows : totalRows;
+		if (maxRows && overflowRows > maxRows && !overflowed) {
 			overflowed = true;
 			if (!overflowNotified) {
 				overflowNotified = true;
-				options.onOverflow?.({ rows: totalRows, maxRows });
+				options.onOverflow?.({ rows: overflowRows, maxRows });
 			}
 			if (clearScrollbackOnOverflow) {
 				clearMode = "scrollback";
