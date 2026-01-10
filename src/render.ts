@@ -759,16 +759,18 @@ function renderTable(node: Table, ctx: RenderContext): string[] {
 	const widths = new Array(colCount).fill(1);
 	const aligns = node.align || [];
 	const pad = ctx.options.tablePadding;
+	const padStr = " ".repeat(Math.max(0, pad));
 	const minContent = Math.max(1, ctx.options.tableEllipsis.length + 1);
 	// ensure we always have room for at least one visible char + ellipsis + padding
 	const minColWidth = Math.max(1, pad * 2 + minContent);
 
 	cells.forEach((row: string[]) => {
 		row.forEach((cell: string, idx: number) => {
+			const padded = `${padStr}${cell}${padStr}`;
 			// Cap each column to MAX_COL but keep at least 1
 			widths[idx] = Math.max(
 				widths[idx],
-				Math.min(MAX_COL, visibleWidth(cell)),
+				Math.min(MAX_COL, visibleWidth(padded)),
 			);
 		});
 	});
@@ -790,24 +792,20 @@ function renderTable(node: Table, ctx: RenderContext): string[] {
 
 	const renderRow = (row: string[], isHeader = false) => {
 		const linesPerCol: string[][] = row.map((cell: string, idx: number) => {
-			const padded = ` ${cell} `;
 			const target = Math.max(minContent, widths[idx] - pad * 2);
-			const cellText = ctx.options.tableTruncate
+			const content = ctx.options.tableTruncate
 				? truncateCell(cell, target, ctx.options.tableEllipsis)
-				: padded;
+				: cell;
 			const wrapped = wrapText(
-				cellText,
+				content,
 				ctx.options.wrap ? target : Number.MAX_SAFE_INTEGER,
 				ctx.options.wrap,
 			);
-			return wrapped.map((l) =>
-				padCell(
-					` ${l} `,
-					widths[idx],
-					aligns[idx] ?? "left",
-					ctx.options.tablePadding,
-				),
-			);
+			return wrapped.map((l) => {
+				const aligned = padCell(l, target, aligns[idx] ?? "left");
+				const padded = `${padStr}${aligned}${padStr}`;
+				return padCell(padded, widths[idx], "left");
+			});
 		});
 		// Row height = max wrapped lines in any column; pad shorter ones
 		const height = Math.max(...linesPerCol.map((c) => c.length));

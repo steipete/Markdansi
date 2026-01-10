@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { render } from "./index.js";
 import type { RenderOptions, ThemeName } from "./types.js";
 
@@ -140,10 +140,21 @@ function main(): void {
 	}
 }
 
+export function isDirectCliInvocation(
+	metaUrl: string,
+	argv1?: string,
+): boolean {
+	if (!argv1) return false;
+	try {
+		const entry = fs.realpathSync(argv1);
+		const self = fs.realpathSync(fileURLToPath(metaUrl));
+		return entry === self;
+	} catch {
+		return false;
+	}
+}
+
 // Only run the CLI when executed directly, not when imported for tests.
-const entryHref = process.argv[1]
-	? pathToFileURL(process.argv[1]).href
-	: undefined;
-if (import.meta.url === entryHref) {
+if (isDirectCliInvocation(import.meta.url, process.argv[1])) {
 	main();
 }

@@ -110,6 +110,40 @@ describe("tables", () => {
 		expect(lines.length).toBeGreaterThan(3);
 	});
 
+	it("wraps cells without shifting columns into separate rows", () => {
+		const md = `
+| h1 | h2 |
+| --- | --- |
+| a b c d e f | g |
+`;
+		const out = strip(md, {
+			...noColor,
+			width: 15,
+			wrap: true,
+			tableTruncate: false,
+		});
+		const bodyLines = out
+			.split("\n")
+			.map((l) => l.trimEnd())
+			.filter((l) => l.includes("│"))
+			.filter((l) => l.includes("g"));
+		expect(bodyLines.length).toBeGreaterThan(0);
+		for (const line of bodyLines) {
+			expect(line).toContain("a");
+		}
+	});
+
+	it("does not truncate header cells when content fits", () => {
+		const md = `
+| Provider | Enabled | Configured | Detail |
+| --- | --- | --- | --- |
+| WhatsApp | ON | WARN | not linked |
+`;
+		const out = strip(md, { ...noColor, width: 120, wrap: true });
+		expect(out).toContain("Provider");
+		expect(out).not.toContain("Provi…");
+	});
+
 	it("allows long words in cells to overflow (no hard break)", () => {
 		const word = "Supercalifragilistic";
 		const md = `

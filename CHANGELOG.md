@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.1 (2026-01-10)
+
+- Fix table padding math so headers/cells don't truncate early.
+- Fix `tableTruncate=false` wrapping so multi-line cells don't shift columns into separate rows.
+- Fix CLI "executed directly" detection for paths containing `..` segments.
+
 ## 0.2.0 (2025-12-26)
 
 - **Streaming (hybrid blocks):** add `createMarkdownStreamer()` for append-only, scrollback-safe streaming.
