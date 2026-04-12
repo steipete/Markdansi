@@ -82,6 +82,7 @@ export function parseArgs(argv: string[]): CliArgs {
 			if (next) args.quotePrefix = next;
 			i += 1;
 		} else if (a === "--help" || a === "-h") args.help = true;
+		else if (!a.startsWith("-") && !args.in) args.in = a;
 	}
 	return args;
 }
@@ -93,7 +94,13 @@ function main(): void {
 	handleStdoutEpipe();
 	const args = parseArgs(process.argv);
 	if (args.help) {
-		process.stdout.write(`markdansi options:
+		process.stdout.write(`markdansi [FILE] [options]
+
+  markdansi file.md            Render file
+  markdansi --in file.md       Same (explicit)
+  cat file.md | markdansi      Read from stdin
+
+Options:
   --in FILE           Input file (default: stdin)
   --out FILE          Output file (default: stdout)
   --width N           Wrap width (default: TTY cols or 80)
