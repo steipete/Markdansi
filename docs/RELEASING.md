@@ -3,6 +3,7 @@
 This merges the checklist and the running release log into one file for convenience.
 
 ## Checklist
+
 - Node 22+ and pnpm installed; `npm whoami` logged in as publisher.
 - Bump version in `package.json`.
 - Update `CHANGELOG.md` (descending order, concise bullets, blank lines between versions, no duplicates).
@@ -27,11 +28,11 @@ This merges the checklist and the running release log into one file for convenie
 
 ## Release log
 
-| Version | Date (UTC) | Actions | Notes |
-| --- | --- | --- | --- |
-| 0.2.0 | 2025-12-26 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.2.0`, `git push --tags`, `gh release create v0.2.0` | Hybrid streaming + remove live renderer. |
-| 0.1.7 | 2025-12-19 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.7`, `git push --tags`, `gh release create v0.1.7` | Avoid orphaned trailing articles/prepositions when wrapping. |
-| 0.1.6 | 2025-12-19 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.6`, `git push --tags`, `gh release create v0.1.6` | Collapse soft line breaks in paragraphs/lists; preserve hard breaks; more tests. |
-| 0.1.5 | 2025-12-18 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.5`, `git push --tags`, `gh release create v0.1.5` | Live in-place renderer (`createLiveRenderer`) + row-aware redraw + more tests (removed in 0.2.0). |
-| 0.1.4 | 2025-12-18 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.4`, `git push --tags`, `gh release create v0.1.4` | Export fallback for TSX/CJS resolution (`default`), plus docs note. |
-| 0.1.3 | 2025-11-18 | `pnpm lint`, `pnpm test`, `pnpm compile`, `npm publish`, `git tag v0.1.3`, `git push --tags` | Parser normalization: merge code-only lists, auto-tag diffs, unbox single-line code. |
+| Version | Date (UTC) | Actions                                                                                                                                | Notes                                                                                             |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 0.2.0   | 2025-12-26 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.2.0`, `git push --tags`, `gh release create v0.2.0` | Hybrid streaming + remove live renderer.                                                          |
+| 0.1.7   | 2025-12-19 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.7`, `git push --tags`, `gh release create v0.1.7` | Avoid orphaned trailing articles/prepositions when wrapping.                                      |
+| 0.1.6   | 2025-12-19 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.6`, `git push --tags`, `gh release create v0.1.6` | Collapse soft line breaks in paragraphs/lists; preserve hard breaks; more tests.                  |
+| 0.1.5   | 2025-12-18 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.5`, `git push --tags`, `gh release create v0.1.5` | Live in-place renderer (`createLiveRenderer`) + row-aware redraw + more tests (removed in 0.2.0). |
+| 0.1.4   | 2025-12-18 | `pnpm lint`, `pnpm test`, `pnpm types`, `pnpm compile`, `npm publish`, `git tag v0.1.4`, `git push --tags`, `gh release create v0.1.4` | Export fallback for TSX/CJS resolution (`default`), plus docs note.                               |
+| 0.1.3   | 2025-11-18 | `pnpm lint`, `pnpm test`, `pnpm compile`, `npm publish`, `git tag v0.1.3`, `git push --tags`                                           | Parser normalization: merge code-only lists, auto-tag diffs, unbox single-line code.              |

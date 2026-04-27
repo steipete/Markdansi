@@ -11,6 +11,7 @@ Tiny, dependency-light Markdown → ANSI renderer and CLI for modern Node (>=22)
 Published on npm as `markdansi`.
 
 ## Install
+
 Grab it from npm; no native deps, so install is instant on Node 22+.
 
 ```bash
@@ -22,6 +23,7 @@ npm install markdansi
 ```
 
 ## CLI
+
 Quick one-shot renderer: pipe Markdown in, ANSI comes out. Flags let you pick width, wrap, colors, links, and table/list styling.
 
 ```bash
@@ -36,71 +38,75 @@ markdansi [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-li
 - Lists/quotes: `--list-indent` sets spaces per nesting level (default 2); `--quote-prefix` sets blockquote prefix (default `│ `).
 
 ## Library
+
 Use the renderer directly in Node/TS for customizable theming, optional syntax highlighting hooks, and OSC‑8 link control.
 
 ### ESM / CommonJS
+
 Markdansi ships ESM (`"type":"module"`). If you’re in CommonJS (or a tool like `tsx` running your script as CJS), prefer dynamic import:
 
 ```js
-const { render } = await import('markdansi');
-console.log(render('# hello'));
+const { render } = await import("markdansi");
+console.log(render("# hello"));
 ```
 
 ### Streaming (recommended: hybrid blocks)
+
 If you’re streaming Markdown (LLM output), keep scrollback safe by emitting **completed fragments only**
 and writing them once (append-only; no in-place redraw).
 
 Hybrid mode streams regular lines as they complete, but buffers multi-line constructs that need context:
+
 - Fenced code blocks (``` / ~~~) — flushed only after the closing fence
 - Tables — flushed only after the header separator row + until the table ends
 
 ```js
-import { createMarkdownStreamer, render } from 'markdansi';
+import { createMarkdownStreamer, render } from "markdansi";
 
 const streamer = createMarkdownStreamer({
   render: (md) => render(md, { width: process.stdout.columns ?? 80 }),
-  spacing: 'single', // collapse consecutive blank lines
+  spacing: "single", // collapse consecutive blank lines
 });
 
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', (delta) => {
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", (delta) => {
   const chunk = streamer.push(delta);
   if (chunk) process.stdout.write(chunk);
 });
-process.stdin.on('end', () => {
+process.stdin.on("end", () => {
   const tail = streamer.finish();
   if (tail) process.stdout.write(tail);
 });
 ```
 
-```js
-import { render, createRenderer, strip, themes } from 'markdansi';
+````js
+import { render, createRenderer, strip, themes } from "markdansi";
 
-const ansi = render('# Hello **world**', { width: 60 });
+const ansi = render("# Hello **world**", { width: 60 });
 
 const renderNoWrap = createRenderer({ wrap: false });
-const out = renderNoWrap('A very long line...');
+const out = renderNoWrap("A very long line...");
 
 // Plain text (no ANSI/OSC)
-const plain = strip('link to [x](https://example.com)');
+const plain = strip("link to [x](https://example.com)");
 
 // Custom theme and highlighter hook
 const custom = createRenderer({
   theme: {
     ...themes.default,
-    code: { color: 'cyan', dim: true }, // fallback used for inline/block
-    inlineCode: { color: 'red' },
-    blockCode: { color: 'green' },
+    code: { color: "cyan", dim: true }, // fallback used for inline/block
+    inlineCode: { color: "red" },
+    blockCode: { color: "green" },
   },
   highlighter: (code, lang) => code.toUpperCase(),
 });
-console.log(custom('`inline`\n\n```\nblock code\n```'));
+console.log(custom("`inline`\n\n```\nblock code\n```"));
 
 // Example: real syntax highlighting with Shiki (TS + Swift)
-import { bundledLanguages, bundledThemes, createHighlighter } from 'shiki';
+import { bundledLanguages, bundledThemes, createHighlighter } from "shiki";
 
 const shiki = await createHighlighter({
-  themes: [bundledThemes['github-dark']],
+  themes: [bundledThemes["github-dark"]],
   langs: [bundledLanguages.typescript, bundledLanguages.swift],
 });
 
@@ -108,27 +114,29 @@ const highlighted = createRenderer({
   highlighter: (code, lang) => {
     if (!lang) return code;
     const normalized = lang.toLowerCase();
-    if (!['ts', 'typescript', 'swift'].includes(normalized)) return code;
+    if (!["ts", "typescript", "swift"].includes(normalized)) return code;
     const { tokens } = shiki.codeToTokens(code, {
-      lang: normalized === 'swift' ? 'swift' : 'ts',
-      theme: 'github-dark',
+      lang: normalized === "swift" ? "swift" : "ts",
+      theme: "github-dark",
     });
     return tokens
       .map((line) =>
         line
           .map((token) =>
-            token.color ? `\u001b[38;2;${parseInt(token.color.slice(1, 3), 16)};${parseInt(
-              token.color.slice(3, 5),
-              16,
-            )};${parseInt(token.color.slice(5, 7), 16)}m${token.content}\u001b[39m` : token.content,
+            token.color
+              ? `\u001b[38;2;${parseInt(token.color.slice(1, 3), 16)};${parseInt(
+                  token.color.slice(3, 5),
+                  16,
+                )};${parseInt(token.color.slice(5, 7), 16)}m${token.content}\u001b[39m`
+              : token.content,
           )
-          .join(''),
+          .join(""),
       )
-      .join('\n');
+      .join("\n");
   },
 });
-console.log(highlighted('```ts\nconst x: number = 1\n```\n```swift\nlet x = 1\n```'));
-```
+console.log(highlighted("```ts\nconst x: number = 1\n```\n```swift\nlet x = 1\n```"));
+````
 
 ### Options
 
