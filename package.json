@@ -68,6 +68,7 @@
   "devDependencies": {
     "@types/mdast": "^4.0.4",
     "@types/node": "^25.6.0",
+    "@typescript/native-preview": "7.0.0-dev.20260503.1",
     "@vitest/coverage-v8": "^4.1.5",
     "oxfmt": "^0.47.0",
     "oxlint": "^1.62.0",
