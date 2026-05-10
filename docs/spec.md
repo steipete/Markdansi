@@ -3,6 +3,7 @@
 Goal: Tiny, dependency‑light Markdown → ANSI renderer & CLI for Node ≥22, using pnpm. Output is terminal ANSI only (no HTML). Focus on readable defaults, sensible wrapping, and minimal runtime deps.
 
 ## Core Dependencies (runtime)
+
 - `micromark`, `micromark-extension-gfm`, `micromark-util-combine-extensions`: GFM parsing (tables, task lists, strikethrough, autolink literals).
 - `chalk`: small, ESM‑only color/style helper.
 - `string-width`: correct visible width (emoji / wide chars).
@@ -12,7 +13,9 @@ Goal: Tiny, dependency‑light Markdown → ANSI renderer & CLI for Node ≥22, 
 Dev: `vitest`, TypeScript (NodeNext).
 
 ## Surface Area
+
 ### Library (ESM default, CJS export provided)
+
 `render(markdown: string, options?: RenderOptions): string`
 
 `createRenderer(options?: RenderOptions): (md: string) => string`
@@ -42,13 +45,16 @@ Each theme entry holds simple SGR intents (bold/italic/fg color names). `inlineC
 `strip(markdown: string): string` — convenience: render with `color=false`, `hyperlinks=false`.
 
 ### CLI
-`markdansi [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright]`
-- Input: stdin if no `--in`.
+
+`markdansi [FILE] [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright]`
+
+- Input: positional `FILE`, `--in FILE`, or stdin when neither is given.
 - Output: stdout if no `--out`.
 - Wrap: on by default; `--no-wrap` disables; width auto from TTY when not provided.
 - Links: OSC‑8 hyperlinks enabled when terminal supports; `--no-links` disables.
 
 ## Feature Scope (v1)
+
 - Blocks: paragraphs, headings (1–6), blockquotes, fenced/indented code blocks, HR, tables, unordered/ordered lists, task lists.
 - Inline: strong, emphasis, code spans, autolinks/links, strikethrough (GFM `~~`), backslash escapes.
 - Code blocks: monospace box (unicode or ascii; `codeBox=false` disables). Optional gutter with 1‑based line numbers when `codeGutter=true`. If `lang` present, show faint header label. Highlighter hook may recolor text but must not add/remove newlines. Code blocks wrap to the available width by default (hard-wrap long tokens); set `codeWrap=false` to allow overflow.
@@ -58,15 +64,17 @@ Each theme entry holds simple SGR intents (bold/italic/fg color names). `inlineC
 - Error handling: never throw on malformed emphasis; leave literals untouched if unmatched.
 
 ## Rendering Pipeline
-1) **Parse** via micromark with combined GFM extensions → AST events.
-2) **Build light IR** (nodes: paragraph, heading, list, listItem, taskItem, table, tableRow, tableCell, code, inline text/emph/strong/del/code/link).
-3) **Render** to ANSI:
+
+1. **Parse** via micromark with combined GFM extensions → AST events.
+2. **Build light IR** (nodes: paragraph, heading, list, listItem, taskItem, table, tableRow, tableCell, code, inline text/emph/strong/del/code/link).
+3. **Render** to ANSI:
    - Style map from theme to SGR codes.
    - Wrap paragraphs/table cells using `string-width` + `strip-ansi`; wrap only breaks on spaces.
    - OSC‑8 links when `hyperlinks` true; otherwise underline + optional URL suffix.
    - Track active SGR for wrapping splits to re-open styles on new lines.
 
 ## Themes (initial)
+
 - `default`: bold headings, blue links, cyan inline code, green block code, yellow table headers, subtle quotes/hr.
 - `dim`: muted colors for low-contrast terminals.
 - `bright`: higher contrast variant.
@@ -75,17 +83,21 @@ Each theme entry holds simple SGR intents (bold/italic/fg color names). `inlineC
 - `contrast`: magenta headings, cyan inline, green block code, yellow headers, bright markers.
 
 ## Testing (vitest)
+
 - Unit: inline formatting (emph/strong/code/strike), links/hyperlinks on/off, wrap/no-wrap behavior, table alignment and wrapping, task lists, strikethrough.
 - Snapshot-ish string comparisons for representative documents (with colors off to avoid brittle codes).
 
 ## Non-Goals (v1)
+
 - Images, footnotes, math, HTML passthrough, syntax highlighting bundle.
 
 ## Notes
+
 - Highlighting: built-in is “label-only”; extensibility via `highlighter` hook. No extra deps added for highlighting.
 - ESM-first; provide CJS export entry for compatibility.
 
 ## Behaviors & edge-case rules
+
 - Wrap/width precedence: `wrap=false` disables all hard wrapping; `width` is ignored in that mode. When `wrap=true`, width is `options.width ?? ttyColumns ?? 80`.
 - Color flag: `color=false` removes all ANSI/OSC output (no bold/italic/underline, no hyperlinks); output is plain text.
 - Hyperlinks fallback: inline links render as `label (url)` when OSC‑8 disabled; autolinks render as the URL only. URLs count toward width.
