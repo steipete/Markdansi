@@ -61,6 +61,7 @@
     "micromark": "^4.0.2",
     "micromark-extension-gfm": "^3.0.0",
     "micromark-util-combine-extensions": "^2.0.1",
+    "slice-ansi": "^9.0.0",
     "string-width": "^8.2.1",
     "strip-ansi": "^7.2.0",
     "supports-hyperlinks": "^4.4.0"

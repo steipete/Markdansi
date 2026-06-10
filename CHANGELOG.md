@@ -3,6 +3,7 @@
 ## Unreleased
 
 - CLI: support `markdansi file.md` positional input files (#3, thanks @risenowrise).
+- Fix table truncation for styled, linked, CJK, and emoji cells without leaking ANSI/OSC state (#4, thanks @devYRPauli).
 
 ## 0.2.1 (2026-01-10)
 

@@ -9,6 +9,7 @@ import type {
   Root,
   Table,
 } from "mdast";
+import sliceAnsi from "slice-ansi";
 import stringWidth from "string-width";
 import stripAnsi from "strip-ansi";
 import { hyperlinkSupported, osc8 } from "./hyperlink.js";
@@ -766,8 +767,20 @@ function renderTable(node: Table, ctx: RenderContext): string[] {
 
 function truncateCell(text: string, width: number, ellipsis: string): string {
   if (stringWidth(text) <= width) return text;
-  if (width <= ellipsis.length) return ellipsis.slice(0, width);
-  return text.slice(0, width - ellipsis.length) + ellipsis;
+  const ellipsisWidth = stringWidth(ellipsis);
+  if (width <= ellipsisWidth) return sliceCellContent(ellipsis, width);
+  return `${sliceCellContent(text, width - ellipsisWidth)}${ellipsis}`;
+}
+
+function sliceCellContent(text: string, width: number): string {
+  let end = Math.max(0, width);
+  let sliced = sliceAnsi(text, 0, end);
+  // slice-ansi owns ANSI/OSC/grapheme boundaries; clamp with Markdansi's width metric.
+  while (end > 0 && stringWidth(sliced) > width) {
+    end -= 1;
+    sliced = sliceAnsi(text, 0, end);
+  }
+  return sliced;
 }
 
 function wrapCodeLine(text: string, width: number): string[] {
