@@ -2,6 +2,8 @@
 
 ## 0.3.3 - Unreleased
 
+- CLI: restore support for the `solarized`, `monochrome`, and `contrast` built-in themes.
+
 ## 0.3.2 (2026-07-01)
 
 - CLI: apply documented table/code rendering flags and reject invalid, missing, or unknown options with clear errors (#7).

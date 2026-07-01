@@ -27,7 +27,7 @@ npm install markdansi
 Quick one-shot renderer: pipe Markdown in, ANSI comes out. Flags let you pick width, wrap, colors, links, and table/list styling.
 
 ```bash
-markdansi [FILE] [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright]
+markdansi [FILE] [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright|solarized|monochrome|contrast]
 [--list-indent N] [--quote-prefix STR]
 ```
 

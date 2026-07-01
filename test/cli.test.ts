@@ -33,10 +33,17 @@ describe("cli input args", () => {
     );
   });
 
-  it("accepts documented separate theme and table border values", () => {
-    expect(
-      parseArgs(["node", "cli", "--theme", "bright", "--table-border", "ascii"]),
-    ).toMatchObject({ theme: "bright", tableBorder: "ascii" });
+  it.each(["default", "dim", "bright", "solarized", "monochrome", "contrast"])(
+    "accepts the built-in %s theme",
+    (theme) => {
+      expect(parseArgs(["node", "cli", "--theme", theme])).toMatchObject({ theme });
+    },
+  );
+
+  it("accepts a documented separate table border value", () => {
+    expect(parseArgs(["node", "cli", "--table-border", "ascii"])).toMatchObject({
+      tableBorder: "ascii",
+    });
   });
 
   it("accepts dash-prefixed text values and bare code flags", () => {
@@ -68,7 +75,10 @@ describe("cli input args", () => {
     [["--list-indent", ""], "--list-indent must be a non-negative integer"],
     [["--list-indent", "-1"], "--list-indent must be a non-negative integer"],
     [["--table-padding", "1.5"], "--table-padding must be a non-negative integer"],
-    [["--theme", "neon"], "--theme must be default, dim, or bright"],
+    [
+      ["--theme", "neon"],
+      "--theme must be one of: default, dim, bright, solarized, monochrome, contrast",
+    ],
     [["--table-border", "rounded"], "--table-border must be unicode, ascii, or none"],
     [["--width"], "--width requires a value"],
     [["--wat"], "unknown option: --wat"],
@@ -115,6 +125,18 @@ describe("cli input args", () => {
     expect(output).toContain("+----+----+");
     expect(output).not.toContain("┌");
     expect(output).toContain("const x = 1;");
+  });
+
+  it("renders with an extended built-in theme", () => {
+    const result = spawnSync(
+      "pnpm",
+      ["exec", "tsx", "src/cli.ts", "--theme", "solarized", "--no-color", "--no-links"],
+      { encoding: "utf8", input: "# Solarized\n" },
+    );
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(result.stdout).toContain("Solarized");
   });
 
   it("reports invalid numeric options without a stack trace", () => {

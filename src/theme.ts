@@ -1,6 +1,6 @@
 import type { ChalkInstance } from "chalk";
 import { Chalk } from "chalk";
-import type { StyleIntent, Theme } from "./types.js";
+import type { StyleIntent, Theme, ThemeName } from "./types.js";
 
 const base: Theme = {
   heading: { color: "yellow", bold: true },
@@ -70,15 +70,7 @@ const contrast: Theme = {
   tableCell: { color: "white" },
 };
 
-export interface Themes {
-  default: Theme;
-  dim: Theme;
-  bright: Theme;
-  solarized: Theme;
-  monochrome: Theme;
-  contrast: Theme;
-  [key: string]: Theme;
-}
+export type Themes = Record<ThemeName, Theme> & Record<string, Theme>;
 
 export const themes: Themes = {
   default: Object.freeze(base),

@@ -47,7 +47,7 @@ Each theme entry holds simple SGR intents (bold/italic/fg color names). `inlineC
 
 ### CLI
 
-`markdansi [FILE] [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright]`
+`markdansi [FILE] [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright|solarized|monochrome|contrast]`
 
 - Input: positional `FILE`, `--in FILE`, or stdin when neither is given.
 - Output: stdout if no `--out`.

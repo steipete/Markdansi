@@ -36,7 +36,16 @@ export type Theme = {
   tableCell?: StyleIntent;
 };
 
-export type ThemeName = "default" | "dim" | "bright";
+export const themeNames = [
+  "default",
+  "dim",
+  "bright",
+  "solarized",
+  "monochrome",
+  "contrast",
+] as const;
+
+export type ThemeName = (typeof themeNames)[number];
 
 export type Highlighter = (code: string, lang?: string) => string;
 

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { render } from "./index.js";
+import { themeNames } from "./types.js";
 import type { RenderOptions, ThemeName } from "./types.js";
 
 type CliArgs = Partial<RenderOptions> & {
@@ -34,8 +35,9 @@ function parseIntegerOption(option: string, value: string, minimum: number): num
 }
 
 function parseTheme(value: string): ThemeName {
-  if (value === "default" || value === "dim" || value === "bright") return value;
-  throw new Error("--theme must be default, dim, or bright");
+  const theme = themeNames.find((candidate) => candidate === value);
+  if (theme) return theme;
+  throw new Error(`--theme must be one of: ${themeNames.join(", ")}`);
 }
 
 function parseTableBorder(value: string): NonNullable<RenderOptions["tableBorder"]> {
@@ -144,7 +146,7 @@ Options:
   --no-wrap           Disable hard wrapping
   --no-color          Disable ANSI/OSC output
   --no-links          Disable OSC-8 hyperlinks
-  --theme NAME        Theme (default|dim|bright)
+  --theme NAME        Theme (${themeNames.join("|")})
   --list-indent N     Spaces per list nesting level (default: 2)
   --quote-prefix STR  Prefix for blockquotes (default: "│ ")
   --table-border STR  unicode|ascii|none
