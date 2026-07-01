@@ -2,6 +2,8 @@
 
 ## 0.3.2 - Unreleased
 
+- CLI: apply documented table/code rendering flags and reject invalid, missing, or unknown options with clear errors.
+
 ## 0.3.1 (2026-06-11)
 
 - Replace the unified/micromark parser graph with Marked and use one TypeScript compiler, substantially reducing install size and package count.
