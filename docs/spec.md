@@ -41,7 +41,7 @@ Dev: `vitest`, TypeScript (NodeNext).
 `}``
 
 `type Theme = { heading, strong, emph, inlineCode, blockCode, code?, link, quote, hr, listMarker, tableHeader, tableCell, tableBorder, tableSeparator }`
-Each theme entry holds simple SGR intents (bold/italic/fg color names). `inlineCode` / `blockCode` are used if present; otherwise `code` acts as a fallback for both. Theme exposes defaults for table borders/separators; caller can override per render via options above.
+Each theme entry holds simple SGR intents (bold/italic plus named, `#rrggbb`, or ANSI-256 numeric-string foreground/background colors). `inlineCode` / `blockCode` are used if present; otherwise `code` acts as a fallback for both. Theme exposes defaults for table borders/separators; caller can override per render via options above.
 
 `strip(markdown: string): string` — convenience: render with `color=false`, `hyperlinks=false`.
 

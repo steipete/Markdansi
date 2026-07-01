@@ -1,6 +1,6 @@
 import type { ChalkInstance } from "chalk";
 import { Chalk } from "chalk";
-import type { StyleIntent, Theme, ThemeName } from "./types.js";
+import type { ColorName, StyleIntent, Theme, ThemeName } from "./types.js";
 
 const base: Theme = {
   heading: { color: "yellow", bold: true },
@@ -83,6 +83,21 @@ export const themes: Themes = {
 
 export type Styler = (text: string, style?: StyleIntent) => string;
 
+function applyColor(fn: ChalkInstance, color: ColorName, background = false): ChalkInstance {
+  if (color.startsWith("#")) return background ? fn.bgHex(color) : fn.hex(color);
+
+  if (/^\d+$/.test(color)) {
+    const index = Number(color);
+    if (index <= 255) return background ? fn.bgAnsi256(index) : fn.ansi256(index);
+    return fn;
+  }
+
+  const name =
+    background && !color.startsWith("bg") ? `bg${color[0]?.toUpperCase()}${color.slice(1)}` : color;
+  const indexed = fn as unknown as Record<string, ChalkInstance | undefined>;
+  return indexed[name] ?? fn;
+}
+
 /**
  * Create a Chalk-based styling helper that applies StyleIntent safely.
  */
@@ -92,14 +107,8 @@ export function createStyler({ color }: { color: boolean }): Styler {
   const apply: Styler = (text, style = {}) => {
     if (!color) return text;
     let fn: ChalkInstance = chalk;
-    if (style.color) {
-      const indexed = fn as unknown as Record<string, ChalkInstance | undefined>;
-      if (indexed[style.color]) fn = indexed[style.color] as ChalkInstance;
-    }
-    if (style.bgColor) {
-      const indexed = fn as unknown as Record<string, ChalkInstance | undefined>;
-      if (indexed[style.bgColor]) fn = indexed[style.bgColor] as ChalkInstance;
-    }
+    if (style.color) fn = applyColor(fn, style.color);
+    if (style.bgColor) fn = applyColor(fn, style.bgColor, true);
     if (style.bold) fn = fn.bold;
     if (style.italic) fn = fn.italic;
     if (style.underline) fn = fn.underline;

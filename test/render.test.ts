@@ -245,6 +245,27 @@ describe("styling helpers", () => {
     expect(styled).toContain("\u001b[9m"); // strike
   });
 
+  it("applies named, hex, and ANSI-256 foreground and background colors", () => {
+    const style = createStyler({ color: true });
+
+    expect(style("x", { color: "#2aa198" })).toContain("\u001b[38;2;42;161;152m");
+    expect(style("x", { bgColor: "#2aa198" })).toContain("\u001b[48;2;42;161;152m");
+    expect(style("x", { color: "42" })).toContain("\u001b[38;5;42m");
+    expect(style("x", { bgColor: "42" })).toContain("\u001b[48;5;42m");
+    expect(style("x", { bgColor: "blue" })).toContain("\u001b[44m");
+  });
+
+  it("applies the Solarized block-code color", () => {
+    const ansi = render("```\nblock\n```", {
+      color: true,
+      theme: "solarized",
+      wrap: false,
+      codeBox: false,
+    });
+
+    expect(ansi).toContain("\u001b[38;2;42;161;152m");
+  });
+
   it("uses default theme colors (cyan inline, green block, yellow header)", () => {
     const ansi = render("`inline`\n\n```\nblock\n```\n\n# H", {
       color: true,
