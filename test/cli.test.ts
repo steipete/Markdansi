@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -28,9 +28,52 @@ describe("cli input args", () => {
   });
 
   it("keeps explicit --in ahead of later positional arguments", () => {
-    expect(parseArgs(["node", "cli", "--in", "explicit.md", "ignored.md"])).toMatchObject({
-      in: "explicit.md",
+    expect(() => parseArgs(["node", "cli", "--in", "explicit.md", "ignored.md"])).toThrow(
+      "unexpected positional argument: ignored.md",
+    );
+  });
+
+  it("accepts documented separate theme and table border values", () => {
+    expect(
+      parseArgs(["node", "cli", "--theme", "bright", "--table-border", "ascii"]),
+    ).toMatchObject({ theme: "bright", tableBorder: "ascii" });
+  });
+
+  it("accepts dash-prefixed text values and bare code flags", () => {
+    expect(
+      parseArgs([
+        "node",
+        "cli",
+        "--quote-prefix",
+        "-- ",
+        "--table-ellipsis",
+        "--",
+        "--code-wrap",
+        "--code-box",
+        "--code-gutter",
+      ]),
+    ).toMatchObject({
+      quotePrefix: "-- ",
+      tableEllipsis: "--",
+      codeWrap: true,
+      codeBox: true,
+      codeGutter: true,
     });
+  });
+
+  it.each([
+    [["--width", "nope"], "--width must be a positive integer"],
+    [["--width", " "], "--width must be a positive integer"],
+    [["--width", "0"], "--width must be a positive integer"],
+    [["--list-indent", ""], "--list-indent must be a non-negative integer"],
+    [["--list-indent", "-1"], "--list-indent must be a non-negative integer"],
+    [["--table-padding", "1.5"], "--table-padding must be a non-negative integer"],
+    [["--theme", "neon"], "--theme must be default, dim, or bright"],
+    [["--table-border", "rounded"], "--table-border must be unicode, ascii, or none"],
+    [["--width"], "--width requires a value"],
+    [["--wat"], "unknown option: --wat"],
+  ])("rejects invalid arguments: %j", (input, message) => {
+    expect(() => parseArgs(["node", "cli", ...input])).toThrow(message);
   });
 
   it("renders a positional file instead of reading stdin", () => {
@@ -50,5 +93,40 @@ describe("cli input args", () => {
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
+  });
+
+  it("applies documented table and code rendering flags", () => {
+    const input = "| A | B |\n| - | - |\n| x | y |\n\n```ts\nconst x = 1;\n```\n";
+    const output = execFileSync(
+      "pnpm",
+      [
+        "exec",
+        "tsx",
+        "src/cli.ts",
+        "--no-color",
+        "--no-links",
+        "--table-border",
+        "ascii",
+        "--code-box=false",
+      ],
+      { encoding: "utf8", input },
+    );
+
+    expect(output).toContain("+----+----+");
+    expect(output).not.toContain("┌");
+    expect(output).toContain("const x = 1;");
+  });
+
+  it("reports invalid numeric options without a stack trace", () => {
+    const result = spawnSync(
+      "pnpm",
+      ["exec", "tsx", "src/cli.ts", "--width", "nope", "--no-color"],
+      { encoding: "utf8", input: "hello\n" },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toContain("markdansi: --width must be a positive integer");
+    expect(result.stderr).not.toContain("src/cli.ts:");
   });
 });

@@ -66,19 +66,13 @@
   "devDependencies": {
     "@types/node": "^26.0.1",
     "@vitest/coverage-v8": "^4.1.9",
-    "oxfmt": "^0.56.0",
-    "oxlint": "^1.71.0",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
   },
   "engines": {
     "node": ">=22"
-  },
-  "pnpm": {
-    "overrides": {
-      "esbuild": "0.28.1",
-      "vite": "7.3.5"
-    }
   }
 }
