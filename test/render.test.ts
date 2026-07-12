@@ -141,6 +141,10 @@ describe("wrapping", () => {
   it("does not treat punctuated words as orphan candidates", () => {
     expect(wrapText("hello the, world", 11, true)).toEqual(["hello the,", "world"]);
   });
+
+  it("counts Unicode spacing marks when wrapping", () => {
+    expect(wrapText("का ख", 3, true)).toEqual(["का", "ख"]);
+  });
 });
 
 describe("lists and tasks", () => {
@@ -162,6 +166,11 @@ describe("lists and tasks", () => {
   it("splits loose lists with blank line", () => {
     const out = strip("- item 1\n\n- item 2", noColor);
     expect(out.split("\n").filter((l) => l === "").length).toBeGreaterThan(0);
+  });
+
+  it("keeps ordered lists separate around blockquotes", () => {
+    const out = strip("1. first\n> quote\n2. second\n> quote", noColor);
+    expect(out).toContain("1. first\n│ quote\n2. second\n│ quote");
   });
 });
 
