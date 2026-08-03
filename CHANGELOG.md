@@ -2,7 +2,7 @@
 
 ## 0.3.3 - Unreleased
 
-- Dependencies: update Marked for safer link parsing and block/list fixes, and string-width for correct Unicode spacing-mark widths.
+- Dependencies: update Chalk 6, Marked, string-width, and build tooling, including current PostCSS security fixes.
 - Themes: apply named, hex, and ANSI-256 foreground/background colors, fixing Solarized block code styling.
 - CLI: restore support for the `solarized`, `monochrome`, and `contrast` built-in themes.
 
