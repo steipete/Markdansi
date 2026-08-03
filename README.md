@@ -1,167 +1,114 @@
-# 🎨 Markdansi: Wraps, colors, links—no baggage.
+# Markdansi 🎨 — Markdown, dressed for the terminal.
+
+[![CI](https://img.shields.io/github/actions/workflow/status/steipete/Markdansi/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/steipete/Markdansi/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/markdansi?style=flat-square)](https://www.npmjs.com/package/markdansi)
+[![Node.js](https://img.shields.io/node/v/markdansi?style=flat-square)](https://nodejs.org/)
+[![License](https://img.shields.io/github/license/steipete/Markdansi?style=flat-square)](LICENSE)
 
 <p align="center">
-  <img src="./markdansi.png" alt="Markdansi README header" width="1100">
+  <img src="./markdansi.png" alt="Markdansi rendering Markdown in a terminal" width="1024">
 </p>
 
-![npm](https://img.shields.io/npm/v/markdansi) ![license MIT](https://img.shields.io/badge/license-MIT-blue.svg) ![node >=22](https://img.shields.io/badge/node-%3E%3D22-brightgreen) ![tests vitest](https://img.shields.io/badge/tests-vitest-blue?logo=vitest)
-
-Tiny, dependency-light Markdown → ANSI renderer and CLI for modern Node (>=22). Focuses on readable terminal output with sensible wrapping, GFM support (tables, task lists, strikethrough), optional OSC‑8 hyperlinks, and zero built‑in syntax highlighting (pluggable hook). Written in TypeScript, ships ESM.
-
-Published on npm as `markdansi`.
+Markdansi renders GitHub Flavored Markdown as wrapped ANSI output for Node.js terminals. Use it as a CLI, an ESM library, or an append-only streamer for incremental output.
 
 ## Install
 
-Grab it from npm; no native deps, so install is instant on Node 22+.
+Markdansi requires Node.js 22 or newer. Run the CLI without installing it:
 
-```bash
-bun add markdansi
-# or
-pnpm add markdansi
-# or
+```sh
+npx markdansi README.md
+```
+
+Add the CLI and library to a project with your package manager:
+
+```sh
 npm install markdansi
 ```
 
-## CLI
+## Quick start
 
-Quick one-shot renderer: pipe Markdown in, ANSI comes out. Flags let you pick width, wrap, colors, links, and table/list styling.
+Pipe Markdown to the CLI and it writes rendered output to stdout:
 
-```bash
-markdansi [FILE] [--in FILE] [--out FILE] [--width N] [--no-wrap] [--no-color] [--no-links] [--theme default|dim|bright|solarized|monochrome|contrast]
-[--list-indent N] [--quote-prefix STR]
+```console
+$ printf '# Hello, **terminal**\n\n- wraps Markdown\n- formats tables\n' | npx markdansi --no-color --width 50
+
+Hello, terminal
+- wraps Markdown
+- formats tables
 ```
 
-- Input: positional `FILE`, `--in FILE`, or stdin when neither is given (use `--in -` for stdin explicitly).
-- Output: stdout unless `--out` provided.
-- Wrapping: on by default; `--no-wrap` disables hard wrapping.
-- Links: OSC‑8 when supported; `--no-links` disables.
-- Lists/quotes: `--list-indent` sets spaces per nesting level (default 2); `--quote-prefix` sets blockquote prefix (default `│ `).
+Omit `--no-color` for ANSI styles and OSC-8 links when the terminal supports them.
 
-## Library
-
-Use the renderer directly in Node/TS for customizable theming, optional syntax highlighting hooks, and OSC‑8 link control.
-
-### ESM / CommonJS
-
-Markdansi ships ESM (`"type":"module"`). If you’re in CommonJS (or a tool like `tsx` running your script as CJS), prefer dynamic import:
+## Use as a library
 
 ```js
-const { render } = await import("markdansi");
-console.log(render("# hello"));
+import { render } from "markdansi";
+
+const output = render("# Hello **terminal**", { width: 60 });
+process.stdout.write(output);
 ```
 
-### Streaming (recommended: hybrid blocks)
+Markdansi ships as ESM. CommonJS callers can load it with `import("markdansi")`.
 
-If you’re streaming Markdown (LLM output), keep scrollback safe by emitting **completed fragments only**
-and writing them once (append-only; no in-place redraw).
+`createRenderer()` binds options for repeated renders, while `strip()` produces plain text without ANSI or hyperlinks:
 
-Hybrid mode streams regular lines as they complete, but buffers multi-line constructs that need context:
+```js
+import { createRenderer, strip } from "markdansi";
 
-- Fenced code blocks (``` / ~~~) — flushed only after the closing fence
-- Tables — flushed only after the header separator row + until the table ends
+const renderNarrow = createRenderer({ width: 48, theme: "dim" });
+console.log(renderNarrow("## Status\n\nEverything is **ready**."));
+console.log(strip("Read [the docs](https://example.com)."));
+```
+
+## Stream incremental Markdown
+
+`createMarkdownStreamer()` emits completed fragments without cursor movement or in-place redraw. Regular lines are emitted as they arrive; fenced code blocks and tables are buffered until they are complete.
 
 ```js
 import { createMarkdownStreamer, render } from "markdansi";
 
 const streamer = createMarkdownStreamer({
-  render: (md) => render(md, { width: process.stdout.columns ?? 80 }),
-  spacing: "single", // collapse consecutive blank lines
+  render: (markdown) => render(markdown, { width: process.stdout.columns ?? 80 }),
+  spacing: "single",
 });
 
 process.stdin.setEncoding("utf8");
-process.stdin.on("data", (delta) => {
-  const chunk = streamer.push(delta);
-  if (chunk) process.stdout.write(chunk);
-});
-process.stdin.on("end", () => {
-  const tail = streamer.finish();
-  if (tail) process.stdout.write(tail);
-});
+process.stdin.on("data", (chunk) => process.stdout.write(streamer.push(chunk)));
+process.stdin.on("end", () => process.stdout.write(streamer.finish()));
 ```
 
-````js
-import { render, createRenderer, strip, themes } from "markdansi";
+This mode is intended for append-only output such as streamed model responses and terminal logs.
 
-const ansi = render("# Hello **world**", { width: 60 });
+## Customize rendering
 
-const renderNoWrap = createRenderer({ wrap: false });
-const out = renderNoWrap("A very long line...");
+Built-in themes are `default`, `dim`, `bright`, `solarized`, `monochrome`, and `contrast`. A custom theme can set named, hex, or ANSI-256 foreground and background colors.
 
-// Plain text (no ANSI/OSC)
-const plain = strip("link to [x](https://example.com)");
+| Area            | Main options                                                                  |
+| --------------- | ----------------------------------------------------------------------------- |
+| Layout          | `width`, `wrap`, `listIndent`, `quotePrefix`                                  |
+| Color and links | `color`, `hyperlinks`, `theme`                                                |
+| Tables          | `tableBorder`, `tablePadding`, `tableDense`, `tableTruncate`, `tableEllipsis` |
+| Code blocks     | `codeBox`, `codeGutter`, `codeWrap`, `highlighter`                            |
 
-// Custom theme and highlighter hook
-const custom = createRenderer({
-  theme: {
-    ...themes.default,
-    code: { color: "cyan", dim: true }, // fallback used for inline/block
-    inlineCode: { color: "red" },
-    blockCode: { color: "green" },
-  },
-  highlighter: (code, lang) => code.toUpperCase(),
-});
-console.log(custom("`inline`\n\n```\nblock code\n```"));
+Markdansi does not bundle a syntax highlighter. Pass a `highlighter(code, language)` hook when you need one; see [Syntax highlighting](docs/syntax-highlighting.md) for a Shiki integration.
 
-// Example: real syntax highlighting with Shiki (TS + Swift)
-import { bundledLanguages, bundledThemes, createHighlighter } from "shiki";
+## CLI and behavior reference
 
-const shiki = await createHighlighter({
-  themes: [bundledThemes["github-dark"]],
-  langs: [bundledLanguages.typescript, bundledLanguages.swift],
-});
+The CLI accepts Markdown from a positional file, `--in`, or stdin, and writes to stdout unless `--out` is set. See the [CLI reference](docs/cli.md) for every flag and the [library reference](docs/library.md) for exports, options, rendering behavior, and edge cases.
 
-const highlighted = createRenderer({
-  highlighter: (code, lang) => {
-    if (!lang) return code;
-    const normalized = lang.toLowerCase();
-    if (!["ts", "typescript", "swift"].includes(normalized)) return code;
-    const { tokens } = shiki.codeToTokens(code, {
-      lang: normalized === "swift" ? "swift" : "ts",
-      theme: "github-dark",
-    });
-    return tokens
-      .map((line) =>
-        line
-          .map((token) =>
-            token.color
-              ? `\u001b[38;2;${parseInt(token.color.slice(1, 3), 16)};${parseInt(
-                  token.color.slice(3, 5),
-                  16,
-                )};${parseInt(token.color.slice(5, 7), 16)}m${token.content}\u001b[39m`
-              : token.content,
-          )
-          .join(""),
-      )
-      .join("\n");
-  },
-});
-console.log(highlighted("```ts\nconst x: number = 1\n```\n```swift\nlet x = 1\n```"));
-````
+## Related
 
-### Options
+Looking for a native Swift implementation? See [Swiftdansi](https://github.com/steipete/Swiftdansi).
 
-- `wrap` (default `true`): if `false`, no hard wrapping anywhere.
-- `width`: used only when `wrap===true`; default TTY columns or 80.
-- `color` (default TTY): `false` removes all ANSI/OSC.
-- `hyperlinks` (default auto): enable/disable OSC‑8 links.
-- `theme`: `default | dim | bright | solarized | monochrome | contrast` or custom theme object.
-- `listIndent`: spaces per nesting level (default 2).
-- `quotePrefix`: blockquote line prefix (default `│ `).
-- `tableBorder`: `unicode` (default) | `ascii` | `none`.
-- `tablePadding`: spaces inside cells (default 1); `tableDense` drops extra separators.
-- `tableTruncate`: cap cells to column width (default `true`, ellipsis `…`).
-- `codeBox`: draw a box around fenced code (default true); `codeGutter` shows line numbers; `codeWrap` wraps code lines by default.
-- `highlighter(code, lang)`: optional hook to recolor code blocks; must not add/remove newlines.
+## Development
 
-## Notes
+The build runs formatting, linting, type checking, tests, and compilation:
 
-- Code blocks wrap to the render width by default; disable with `codeWrap=false`. If `lang` is present, a faint `[lang]` label is shown and boxes use unicode borders.
-- Link/reference definitions that spill their titles onto indented lines are merged back into one line so copied notes don’t turn into boxed code.
-- Tables use unicode borders by default, include padding, respect GFM alignment, and truncate long cells with `…` so layouts stay tidy. Turn off truncation with `tableTruncate=false`.
-- Tight vs loose lists follow GFM; task items render `[ ]` / `[x]`.
+```sh
+pnpm install --frozen-lockfile
+pnpm build
+```
 
-See [`docs/spec.md`](docs/spec.md) for full behavior details.
+## License
 
-Looking for the Swift port? Check out [Swiftdansi](https://github.com/steipete/Swiftdansi).
-
-MIT license.
+[MIT](LICENSE)
