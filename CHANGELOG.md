@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.3.4 - Unreleased
+
 ## 0.3.3 (2026-08-02)
 
 - Dependencies: update Chalk 6, Marked, string-width, and build tooling, including current PostCSS security fixes.
