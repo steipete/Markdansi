@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.3 - Unreleased
+## 0.3.3 (2026-08-02)
 
 - Dependencies: update Chalk 6, Marked, string-width, and build tooling, including current PostCSS security fixes.
 - Themes: apply named, hex, and ANSI-256 foreground/background colors, fixing Solarized block code styling.
