@@ -102,7 +102,7 @@ Looking for a native Swift implementation? See [Swiftdansi](https://github.com/s
 
 ## Development
 
-Development uses pnpm 11.24.0 (pinned in `package.json`) and Node.js 22.13 or newer. The build runs formatting, linting, type checking, tests, and compilation:
+Development uses pnpm 11.25.0 (pinned in `package.json`) and Node.js 22.13 or newer. The build runs formatting, linting, type checking, tests, and compilation:
 
 ```sh
 pnpm install --frozen-lockfile

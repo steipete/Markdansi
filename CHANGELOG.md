@@ -3,6 +3,7 @@
 ## 0.3.4 - Unreleased
 
 - Dependencies: update Marked for fixes to nested links, emphasis, and blockquote parsing.
+- Development: refresh pnpm, Node.js types, and Oxc linting/formatting tools.
 
 ## 0.3.3 (2026-08-02)
 
