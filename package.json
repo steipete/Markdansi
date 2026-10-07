@@ -55,25 +55,25 @@
     "markdansi": "tsx src/cli.ts"
   },
   "dependencies": {
-    "chalk": "^6.0.0",
+    "chalk": "^6.0.1",
     "decode-named-character-reference": "^1.3.0",
-    "marked": "^18.0.11",
-    "slice-ansi": "^9.0.0",
-    "string-width": "^8.2.2",
+    "marked": "^18.1.0",
+    "slice-ansi": "^9.0.1",
+    "string-width": "^8.3.0",
     "strip-ansi": "^7.2.0",
-    "supports-hyperlinks": "^4.5.0"
+    "supports-hyperlinks": "^4.6.0"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
-    "@vitest/coverage-v8": "^4.1.11",
-    "oxfmt": "^0.66.0",
-    "oxlint": "^1.81.0",
-    "tsx": "^4.23.13",
+    "@types/node": "^26.6.4",
+    "@vitest/coverage-v8": "^5.0.3",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.3"
   },
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "pnpm@11.25.0"
+  "packageManager": "pnpm@11.28.5"
 }
