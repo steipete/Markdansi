@@ -104,7 +104,7 @@ Each theme entry holds simple SGR intents (bold/italic plus named, `#rrggbb`, or
 - Hyperlinks fallback: inline links render as `label (url)` when OSC‑8 disabled; autolinks render as the URL only. URLs count toward width.
 - Highlighter hook: receives raw code and optional lang; may return ANSI-colored text but must not add or remove newlines. Markdansi owns indentation/padding; code blocks never hard-wrap.
 - Tables width algorithm: compute desired column widths from content (cap at e.g. 40). While total exceeds width, decrement widest columns until it fits; if even minimums won’t fit, allow overflow. Respect GFM alignment per column. Cells with newlines keep those breaks. Optional truncation shortens cells before layout with `tableEllipsis`.
-- Lists: honor GFM tight vs loose lists (tight => no blank line between items; loose => blank line). Nesting indent = 2 spaces per level; bullets use `-`; ordered lists use input numbering.
+- Lists: honor GFM tight vs loose lists (tight => no blank line between items; loose => blank line). Nesting indent = 2 spaces per level; bullets use `-`; ordered lists use input numbering. Child blocks render within the width left beside the marker, preserving their own indentation; continuation lines add `listIndent` spaces.
 - Blockquotes: prefix each wrapped line with `│ ` (configurable via `quotePrefix`); quote content wraps accounting for the prefix width.
 - List indent is configurable via `listIndent` (default 2 spaces per level).
 - Reference-style definitions with indented title continuations are merged into a single paragraph (instead of becoming indented code blocks), preventing stray boxed output in copied logs.

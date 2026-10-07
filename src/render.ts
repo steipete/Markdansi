@@ -321,7 +321,7 @@ export function render(markdown: string, userOptions: RenderOptions = {}): strin
   const style = createStyler({ color: options.color });
   const tree = normalizeNodes(parse(dedent(markdown)));
   const ctx: RenderContext = { options, style };
-  const body = renderChildren(tree.children, ctx, 0, true).join("");
+  const body = renderChildren(tree.children, ctx, true).join("");
   return options.color ? body : stripAnsi(body);
 }
 
@@ -335,7 +335,6 @@ export function createRenderer(options?: RenderOptions) {
 function renderChildren(
   children: Root["children"],
   ctx: RenderContext,
-  indentLevel = 0,
   isTightList = false,
 ): string[] {
   const out: string[][] = [];
@@ -353,11 +352,11 @@ function renderChildren(
       if (langMatch && next && next.type === "code" && !next.lang) {
         (next as Code).lang = langMatch[1];
         i += 1; // skip label paragraph, render the code next
-        out.push(renderNode(next, ctx, indentLevel, isTightList));
+        out.push(renderNode(next, ctx, isTightList));
         continue;
       }
     }
-    out.push(renderNode(node, ctx, indentLevel, isTightList));
+    out.push(renderNode(node, ctx, isTightList));
   }
   return out.flat();
 }
@@ -365,22 +364,21 @@ function renderChildren(
 function renderNode(
   node: Root["children"][number],
   ctx: RenderContext,
-  indentLevel: number,
   isTightList: boolean,
 ): string[] {
   switch (node.type) {
     case "paragraph":
-      return renderParagraph(node, ctx, indentLevel);
+      return renderParagraph(node, ctx);
     case "heading":
       return renderHeading(node, ctx);
     case "thematicBreak":
       return renderHr(ctx);
     case "blockquote":
-      return renderBlockquote(node, ctx, indentLevel);
+      return renderBlockquote(node, ctx);
     case "list":
-      return renderList(node, ctx, indentLevel);
+      return renderList(node, ctx);
     case "listItem":
-      return renderListItem(node, ctx, indentLevel, isTightList);
+      return renderListItem(node, ctx, isTightList);
     case "code":
       return renderCodeBlock(node, ctx);
     case "table":
@@ -392,9 +390,8 @@ function renderNode(
   }
 }
 
-function renderParagraph(node: Paragraph, ctx: RenderContext, indentLevel: number): string[] {
+function renderParagraph(node: Paragraph, ctx: RenderContext): string[] {
   const text = normalizeParagraphInlineText(renderInline(node.children, ctx));
-  const prefix = " ".repeat(ctx.options.listIndent * indentLevel);
   const rawLines = text.split("\n");
   const normalized: string[] = [];
   const defPattern = /^\[[^\]]+]:\s+\S/;
@@ -416,7 +413,7 @@ function renderParagraph(node: Paragraph, ctx: RenderContext, indentLevel: numbe
     normalized.push(line);
   }
   const lines = normalized.flatMap((l) =>
-    wrapWithPrefix(l, ctx.options.width ?? 80, ctx.options.wrap, prefix),
+    wrapWithPrefix(l, ctx.options.width ?? 80, ctx.options.wrap),
   );
   return lines.map((l) => `${l}\n`);
 }
@@ -433,20 +430,20 @@ function renderHr(ctx: RenderContext): string[] {
   return [`${ctx.style(line, ctx.options.theme.hr)}\n`];
 }
 
-function renderBlockquote(node: Blockquote, ctx: RenderContext, indentLevel: number): string[] {
+function renderBlockquote(node: Blockquote, ctx: RenderContext): string[] {
   // Render blockquote children as text, then wrap with the quote prefix so
   // wrapping accounts for prefix width.
-  const inner = renderChildren(node.children, ctx, indentLevel);
+  const inner = renderChildren(node.children, ctx);
   const prefix = ctx.style(ctx.options.quotePrefix, ctx.options.theme.quote);
   const text = inner.join("").trimEnd();
   const wrapped = wrapWithPrefix(text, ctx.options.width ?? 80, ctx.options.wrap, prefix);
   return wrapped.map((l) => `${l}\n`);
 }
 
-function renderList(node: List, ctx: RenderContext, indentLevel: number): string[] {
+function renderList(node: List, ctx: RenderContext): string[] {
   const tight = node.spread === false;
   const items = node.children.flatMap((item: ListItem, idx: number) =>
-    renderListItem(item, ctx, indentLevel, tight, Boolean(node.ordered), node.start ?? 1, idx),
+    renderListItem(item, ctx, tight, Boolean(node.ordered), node.start ?? 1, idx),
   );
   return items;
 }
@@ -454,7 +451,6 @@ function renderList(node: List, ctx: RenderContext, indentLevel: number): string
 function renderListItem(
   node: ListItem,
   ctx: RenderContext,
-  indentLevel: number,
   tight: boolean,
   ordered = false,
   start = 1,
@@ -462,33 +458,27 @@ function renderListItem(
 ): string[] {
   const marker = ordered ? `${start + idx}.` : "-";
   const markerStyled = ctx.style(marker, ctx.options.theme.listMarker);
-  const content = renderChildren(node.children, ctx, indentLevel + 1, tight)
-    .join("")
-    .trimEnd()
-    .split("\n");
+  const isTask = typeof node.checked === "boolean";
+  const box = isTask && node.checked ? "[x]" : "[ ]";
+  const bullet = isTask ? `${ctx.style(box, ctx.options.theme.listMarker)} ` : `${markerStyled} `;
+  const indent = " ".repeat(ctx.options.listIndent);
+
+  // Children render from column 0 at the width left beside the bullet, so nested
+  // lists and code keep their own indentation when this item prefixes them.
+  const { width } = ctx.options;
+  const childWidth =
+    width === undefined
+      ? undefined
+      : Math.max(1, width - Math.max(indent.length, visibleWidth(bullet)));
+  const childCtx: RenderContext = { ...ctx, options: { ...ctx.options, width: childWidth } };
+  const content = renderChildren(node.children, childCtx, tight).join("").trimEnd().split("\n");
 
   // Drop leading blank lines so bullets prefix real content (e.g., headings in lists)
   while (content.length && (content[0]?.trim() ?? "") === "") {
     content.shift();
   }
 
-  const isTask = typeof node.checked === "boolean";
-  const box = isTask && node.checked ? "[x]" : "[ ]";
-  const firstBullet =
-    " ".repeat(ctx.options.listIndent * indentLevel) +
-    (isTask ? `${ctx.style(box, ctx.options.theme.listMarker)} ` : `${markerStyled} `);
-
-  const lines: string[] = [];
-  content.forEach((line: string, i: number) => {
-    const clean = line.replace(/^\s+/, "");
-    const prefix =
-      i === 0
-        ? firstBullet
-        : `${" ".repeat(ctx.options.listIndent * indentLevel)}${" ".repeat(
-            ctx.options.listIndent,
-          )}`;
-    lines.push(prefix + clean);
-  });
+  const lines = content.map((line: string, i: number) => (i === 0 ? bullet : indent) + line);
   if (!tight) lines.push("");
   return lines.map((l) => `${l}\n`);
 }

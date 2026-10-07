@@ -40,6 +40,7 @@ The built-in theme names are `default`, `dim`, `bright`, `solarized`, `monochrom
 ## Rendering behavior
 
 - GitHub Flavored Markdown covers headings, paragraphs, blockquotes, fenced and indented code, tables, ordered and unordered lists, task lists, links, autolinks, emphasis, strong text, and strikethrough.
+- Each nested list level adds `listIndent` spaces. Item content wraps to the width left beside its marker; continuation lines use `listIndent` spaces and retain child list or code indentation.
 - Tables use Unicode borders by default, honor GFM alignment, and shrink or truncate cells to fit the render width where possible.
 - Fenced code uses a box by default, displays a language label when present, and can wrap or show a line-number gutter.
 - Links use OSC-8 when enabled and supported. Without hyperlinks, inline links render as `label (URL)` and autolinks render as the URL.

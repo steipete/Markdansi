@@ -4,7 +4,7 @@ import { handleStdoutEpipe, parseArgs } from "../src/cli.ts";
 import { hyperlinkSupported } from "../src/hyperlink.ts";
 import { render, strip } from "../src/index.ts";
 import { createStyler, themes } from "../src/theme.ts";
-import { wrapText } from "../src/wrap.ts";
+import { visibleWidth, wrapText } from "../src/wrap.ts";
 
 const noColor = { color: false, hyperlinks: false, wrap: true, width: 40 };
 
@@ -186,6 +186,68 @@ describe("lists and tasks", () => {
   it("keeps ordered lists separate around blockquotes", () => {
     const out = strip("1. first\n> quote\n2. second\n> quote", noColor);
     expect(out).toContain("1. first\n│ quote\n2. second\n│ quote");
+  });
+
+  it("indents each nested list level", () => {
+    const out = strip("- one\n  - two\n    - three\n      - four\n- back", noColor);
+    expect(out).toBe("- one\n  - two\n    - three\n      - four\n- back\n");
+  });
+
+  it("keeps code indentation inside list items", () => {
+    const md = "- item\n\n  ```\n  def main():\n      return 1\n  ```";
+    const out = strip(md, { ...noColor, codeBox: false });
+    expect(out).toBe("- item\n  def main():\n      return 1\n\n");
+  });
+
+  it("wraps list item content to the width left beside the marker", () => {
+    const out = strip("1. Wrap numbered list rows well", { ...noColor, width: 30 });
+    expect(out).toBe("1. Wrap numbered list rows\n  well\n");
+  });
+
+  it.each([0, 4])("uses listIndent %i at every nested level", (listIndent) => {
+    const out = strip("- one\n  - two\n    - three", { ...noColor, listIndent });
+    expect(out).toBe(
+      `- one\n${" ".repeat(listIndent)}- two\n${" ".repeat(listIndent * 2)}- three\n`,
+    );
+  });
+
+  it.each(["99.", "- [ ]", "- [x]"])("fits styled %s markers within the width", (marker) => {
+    const out = render(`${marker} alpha beta gamma delta epsilon zeta`, {
+      ...noColor,
+      color: true,
+      width: 24,
+    });
+    expect(out).toContain("\u001b[");
+    expect(
+      out
+        .trimEnd()
+        .split("\n")
+        .every((line) => visibleWidth(line) <= 24),
+    ).toBe(true);
+  });
+
+  it.each([
+    "```\nabcdefghijklmnopqrstuvwxyz0123456789\n```",
+    "---",
+    "| label |\n| --- |\n| abcdefghijklmnopqrstuvwxyz0123456789 |",
+  ])("fits child blocks within the list width: %s", (block) => {
+    const md = `- item\n\n${block
+      .split("\n")
+      .map((line) => `  ${line}`)
+      .join("\n")}`;
+    const out = strip(md, { ...noColor, width: 24, codeBox: false });
+    expect(
+      out
+        .trimEnd()
+        .split("\n")
+        .every((line) => visibleWidth(line) <= 24),
+    ).toBe(true);
+  });
+
+  it("preserves nested indentation when wrapping is disabled", () => {
+    const md = "- one\n  - two\n    - three with a longer line";
+    const out = strip(md, { ...noColor, width: 8, wrap: false });
+    expect(out).toBe(`${md}\n`);
   });
 });
 

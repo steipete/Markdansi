@@ -2,6 +2,7 @@
 
 ## 0.3.5 - Unreleased
 
+- Lists: indent every nested level, preserve code indentation, and fit item content beside its marker (#21, thanks @devYRPauli).
 - Wrapping: stop leaving a stray letter on the previous line when an orphan phrase like `with  the` has extra spaces (#20, thanks @devYRPauli).
 
 ## 0.3.4 (2026-09-13)
