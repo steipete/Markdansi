@@ -47,6 +47,7 @@ The built-in theme names are `default`, `dim`, `bright`, `solarized`, `monochrom
 - `wrap: false` disables hard wrapping and causes `width` to be ignored.
 - Paragraphs and wrapped table cells keep source spacing within phrases when moving trailing articles or prepositions to the next line.
 - Reference definitions with indented title continuations are kept together instead of becoming boxed code.
+- Text character references are decoded once. Invalid numeric references become `�`, and references inside code stay literal.
 
 Markdansi does not render images, footnotes, or math, and it does not interpret raw HTML or bundle a syntax highlighter.
 

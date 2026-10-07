@@ -51,7 +51,8 @@ function convertInlineTokens(tokens: Token[] | undefined): InlineNode[] {
         if (text.tokens?.length) {
           nodes.push(...convertInlineTokens(text.tokens));
         } else {
-          nodes.push({ type: "text", value: decodeEntities(text.text) });
+          // Marked decodes numeric references in text; raw keeps validation and decoding single-pass.
+          nodes.push({ type: "text", value: decodeEntities(text.raw) });
         }
         break;
       }

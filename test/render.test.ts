@@ -19,6 +19,16 @@ describe("inline formatting", () => {
     expect(strip("&#128; &#xD800; &#x110000;", noColor).trim()).toBe("� � �");
   });
 
+  it("decodes character references only once", () => {
+    expect(strip("&#38;copy; &#x26;#65; &amp;copy;", noColor).trim()).toBe("&copy; &#65; &copy;");
+    expect(strip("`&#128;`", noColor).trim()).toBe("&#128;");
+  });
+
+  it("validates numeric references inside styled text, links, and lists", () => {
+    const md = "- **&#128;** [&#x9f;](https://example.com) &#xFDD0;";
+    expect(strip(md, { ...noColor, width: 80 }).trim()).toBe("- � � (https://example.com) �");
+  });
+
   it("uses blockCode / inlineCode themes distinctly", () => {
     const ansi = render("`inline`\n\n```\nblock\n```", {
       color: true,
