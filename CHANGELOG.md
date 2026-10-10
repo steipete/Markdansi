@@ -2,6 +2,7 @@
 
 ## 0.3.5 - Unreleased
 
+- Dependencies: refresh Vite and compatible transitive packages, removing vulnerable source-map-js 1.2.1 from development tooling.
 - Streaming: buffer unlabelled fenced code until its closing fence, preserving literal Markdown inside the block.
 - Internal: share code-block merging and streamed block buffering while preserving rendered output (#23, thanks @copiumnicus).
 - Dependencies: refresh runtime packages and development tools, preserving numeric-reference validation and single-pass entity decoding with Marked 18.1.
