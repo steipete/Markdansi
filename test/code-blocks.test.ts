@@ -126,6 +126,23 @@ ${Array.from({ length: 12 }, (_, i) => `l${i + 1}`).join("\n")}
     expect(out).toContain("second");
   });
 
+  it("merges compatible fenced blocks on both sides of a code-only list", () => {
+    const md =
+      "```txt\nbefore\n```\n\n- ```txt\n  first\n  ```\n- ```txt\n  second\n  ```\n\n```txt\nafter\n```";
+    const out = render(md, { color: false, wrap: false });
+    expect((out.match(/┌/g) ?? []).length).toBe(1);
+    expect(out).toMatch(/before[\s\S]*first[\s\S]*second[\s\S]*after/);
+  });
+
+  it("keeps incompatible languages separate when flattening code-only lists", () => {
+    const md =
+      "```js\nbefore\nsecond line\n```\n\n- ```txt\n  first\n  ```\n- ```txt\n  second\n  ```";
+    const out = render(md, { color: false, wrap: false });
+    expect((out.match(/┌/g) ?? []).length).toBe(2);
+    expect(out).toContain("[js]");
+    expect(out).toContain("[txt]");
+  });
+
   it("tags unfenced diffs and skips wrapping them", () => {
     const md =
       "```\n--- a/foo\n+++ b/foo\n@@ -1 +1 @@\n- a very very very very long line\n+ another very very very very long line\n```";
