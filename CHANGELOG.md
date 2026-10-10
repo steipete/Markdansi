@@ -2,6 +2,7 @@
 
 ## 0.3.5 - Unreleased
 
+- Streaming: buffer unlabelled fenced code until its closing fence, preserving literal Markdown inside the block.
 - Internal: share code-block merging and streamed block buffering while preserving rendered output (#23, thanks @copiumnicus).
 - Dependencies: refresh runtime packages and development tools, preserving numeric-reference validation and single-pass entity decoding with Marked 18.1.
 - Lists: indent every nested level, preserve code indentation, and fit item content beside its marker (#21, thanks @devYRPauli).

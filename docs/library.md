@@ -55,6 +55,6 @@ Markdansi does not render images, footnotes, or math, and it does not interpret 
 
 `createMarkdownStreamer(options)` accepts appended Markdown chunks through `push()` and flushes remaining content through `finish()`. `reset()` clears its state for reuse.
 
-The only streaming mode is `hybrid`. It emits complete ordinary lines immediately, buffers fenced code until its closing fence, and buffers tables until the table ends. The `spacing` option accepts `preserve`, `single` (the default), or `tight`.
+The only streaming mode is `hybrid`. It emits complete ordinary lines immediately, buffers fenced code until its closing fence, and buffers tables until the table ends. Both backtick and tilde fences are buffered even without a language label, so Markdown inside code stays literal. The `spacing` option accepts `preserve`, `single` (the default), or `tight`.
 
 The supplied `render(markdown)` callback must return a self-contained fragment without relying on prior terminal state. Streaming output is append-only and does not move the cursor.
