@@ -145,6 +145,37 @@ describe("markdown streamer (hybrid)", () => {
     expect(out).not.toContain("A");
   });
 
+  it.each(["| A | B |\n", "| A | B |\n|---|---|\n| 1 | 2 |\n", "```txt\nunfinished code\n"])(
+    "reset discards pending blocks and spacing: %j",
+    (markdown) => {
+      const s = createMarkdownStreamer({ render: renderNoColor, spacing: "preserve" });
+      expect(s.push("Before\n\n")).toBe("Before\n\n");
+      expect(s.push(markdown)).toBe("");
+      s.reset();
+      expect(s.push("\nAfter\n") + s.finish()).toBe("After\n");
+    },
+  );
+
+  it.each(["| A | B |", "| A | B |\n|---|---|\n| 1 | 2 |"])(
+    "finish flushes a pending header or table exactly once: %j",
+    (markdown) => {
+      const s = createMarkdownStreamer({ render: renderNoColor });
+      expect(s.push(markdown)).toBe("");
+      expect(s.finish()).toBe(`${renderNoColor(markdown).trimEnd()}\n`);
+      expect(s.finish()).toBe("");
+    },
+  );
+
+  it("flushes a table before buffering a fence and resumes after the fence", () => {
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    const table = "| A | B |\n|---|---|\n| 1 | 2 |\n";
+    expect(s.push(table)).toBe("");
+    expect(s.push("```txt\n")).toBe(`${renderNoColor(table).trimEnd()}\n`);
+    expect(s.push("inside\n")).toBe("");
+    expect(s.finish("```\nAfter")).toBe("inside\nAfter\n");
+    expect(s.finish()).toBe("");
+  });
+
   it("normalizes CRLF newlines", () => {
     const s = createMarkdownStreamer({
       render: renderNoColor,

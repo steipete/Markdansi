@@ -44,6 +44,10 @@ type FenceState = {
   len: number;
 };
 
+type PendingBlock =
+  | { kind: "table"; committed: boolean; md: string }
+  | { kind: "fence"; fence: FenceState; md: string };
+
 function normalizeNewlines(input: string): string {
   return input.replace(/\r\n?/g, "\n");
 }
@@ -61,11 +65,6 @@ function isFenceEnd(line: string, fence: FenceState): boolean {
   const trimmed = line.trimStart();
   const token = fence.char.repeat(fence.len);
   return trimmed.startsWith(token);
-}
-
-function looksLikeTableHeader(line: string): boolean {
-  if (!line.includes("|")) return false;
-  return /[^\s|]/.test(line);
 }
 
 function isTableSeparator(line: string): boolean {
@@ -101,12 +100,7 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
   let blankStreak = 0;
   let started = false;
 
-  let heldTableHeader: string | null = null;
-  let inTable = false;
-  let tableBuffer = "";
-
-  let fence: FenceState | null = null;
-  let fenceBuffer = "";
+  let pending: PendingBlock | null = null;
 
   const emitBlankLine = () => {
     if (!started) return "";
@@ -123,84 +117,65 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
     return normalizeRenderedFragment(render(markdown));
   };
 
-  const flushHeldHeader = () => {
-    if (!heldTableHeader) return "";
-    const md = heldTableHeader;
-    heldTableHeader = null;
-    return emitRendered(md);
-  };
-
-  const flushTable = () => {
-    if (!inTable) return "";
-    inTable = false;
-    const md = tableBuffer;
-    tableBuffer = "";
-    return emitRendered(md);
-  };
-
-  const flushFence = () => {
-    if (!fence) return "";
-    fence = null;
-    const md = fenceBuffer;
-    fenceBuffer = "";
+  const flushPending = () => {
+    if (!pending) return "";
+    const md = pending.md;
+    pending = null;
     return emitRendered(md);
   };
 
   const processLine = (line: string): string => {
     // Fence mode: buffer everything until the closing fence.
-    if (fence) {
-      fenceBuffer += `${line}\n`;
-      if (isFenceEnd(line, fence)) {
-        return flushFence();
+    if (pending?.kind === "fence") {
+      pending.md += `${line}\n`;
+      if (isFenceEnd(line, pending.fence)) {
+        return flushPending();
       }
       return "";
     }
 
-    // Table mode: buffer table rows; flush when it ends.
-    if (inTable) {
+    // Committed table mode: buffer table rows; flush when it ends.
+    if (pending?.kind === "table" && pending.committed) {
       if (line.trim().length === 0) {
-        return flushTable() + emitBlankLine();
+        return flushPending() + emitBlankLine();
       }
       if (!looksLikeTableRow(line)) {
-        return flushTable() + processLine(line);
+        return flushPending() + processLine(line);
       }
-      tableBuffer += `${line}\n`;
+      pending.md += `${line}\n`;
       return "";
     }
 
     // Blank line: flush any held header and emit spacing.
     if (line.trim().length === 0) {
-      return flushHeldHeader() + emitBlankLine();
+      return flushPending() + emitBlankLine();
     }
 
     // Fence start: flush held header and enter fence mode.
     const fenceStart = isFenceStart(line);
     if (fenceStart) {
-      const out = flushHeldHeader();
-      fence = fenceStart;
-      fenceBuffer = `${line}\n`;
+      const out = flushPending();
+      pending = { kind: "fence", fence: fenceStart, md: `${line}\n` };
       // Some fences are single-line in streams (rare). Handle close immediately.
       if (isFenceEnd(line, fenceStart) && line.trimStart().match(/^(```+|~~~+)\s*$/)) {
-        return out + flushFence();
+        return out + flushPending();
       }
       return out;
     }
 
     // If we held a possible table header, check if this line starts a table.
-    if (heldTableHeader) {
-      if (isTableSeparator(line) && looksLikeTableHeader(heldTableHeader)) {
-        inTable = true;
-        tableBuffer = `${heldTableHeader}\n${line}\n`;
-        heldTableHeader = null;
+    if (pending?.kind === "table" && !pending.committed) {
+      if (isTableSeparator(line) && looksLikeTableRow(pending.md)) {
+        pending = { kind: "table", committed: true, md: `${pending.md}\n${line}\n` };
         return "";
       }
-      const out = flushHeldHeader();
+      const out = flushPending();
       return out + processLine(line);
     }
 
     // Potential table header: delay emission until we see the next line.
-    if (looksLikeTableHeader(line)) {
-      heldTableHeader = line;
+    if (looksLikeTableRow(line)) {
+      pending = { kind: "table", committed: false, md: line };
       return "";
     }
 
@@ -231,9 +206,7 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
       buffer = "";
     }
 
-    out += flushHeldHeader();
-    out += flushFence();
-    out += flushTable();
+    out += flushPending();
 
     return out;
   };
@@ -242,11 +215,7 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
     buffer = "";
     blankStreak = 0;
     started = false;
-    heldTableHeader = null;
-    inTable = false;
-    tableBuffer = "";
-    fence = null;
-    fenceBuffer = "";
+    pending = null;
   };
 
   return { push, finish, reset };
