@@ -156,10 +156,6 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
     if (fenceStart) {
       const out = flushPending();
       pending = { kind: "fence", fence: fenceStart, md: `${line}\n` };
-      // Some fences are single-line in streams (rare). Handle close immediately.
-      if (isFenceEnd(line, fenceStart) && line.trimStart().match(/^(```+|~~~+)\s*$/)) {
-        return out + flushPending();
-      }
       return out;
     }
 

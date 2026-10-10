@@ -25,6 +25,21 @@ describe("markdown streamer (hybrid)", () => {
     expect(s.push("```\n")).not.toBe("");
   });
 
+  it.each(["```", "~~~", "````"])("buffers unlabelled %s fences and preserves code", (fence) => {
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    const code = "**literal**\n- keep marker\n";
+    expect(s.push(`${fence}\n`)).toBe("");
+    expect(s.push(code)).toBe("");
+    expect(s.finish(fence)).toBe(`${renderNoColor(`${fence}\n${code}${fence}`).trimEnd()}\n`);
+    expect(s.finish()).toBe("");
+  });
+
+  it("flushes an unclosed unlabelled fence on finish", () => {
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    expect(s.push("```\n**literal**\n")).toBe("");
+    expect(s.finish()).toBe("**literal**\n");
+  });
+
   it("buffers tables until a non-table line", () => {
     const s = createMarkdownStreamer({
       render: renderNoColor,
