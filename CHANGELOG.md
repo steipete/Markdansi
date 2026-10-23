@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Wrapping: preserve input OSC progress controls in rendered and streamed output, fixing a regression in 0.3.6 while retaining CJK wrapping, styles, and hyperlinks.
+
 ## 0.3.6 (2026-10-21)
 
 **Highlights:** Wrap Chinese, Japanese, and Korean text correctly in terminals while preserving styles and hyperlinks.

@@ -63,13 +63,17 @@ function renderAnsiRanges(text: string, ranges: TextRange[]): string[] {
     return codes;
   };
 
-  return ranges.map(({ start, end }) => {
-    active = activeAnsi(active + consumeControls(start, true));
+  return ranges.map(({ start, end }, rangeIndex) => {
+    const leadingCodes = consumeControls(start, true);
     const sourceStart = start + sourceOffset;
     const lineCodes = consumeControls(end, false);
-    const line = sliceAnsi(active + text.slice(sourceStart, end + sourceOffset), 0);
-    active = activeAnsi(active + lineCodes);
-    return line;
+    const sourceLine = text.slice(sourceStart, end + sourceOffset);
+    const trailingCodes = rangeIndex === ranges.length - 1 ? consumeControls(Infinity, true) : "";
+    // Replay source controls exactly once; slice-ansi only understands style/link state.
+    const line = active + leadingCodes + sourceLine + trailingCodes;
+    active = activeAnsi(active + leadingCodes + lineCodes + trailingCodes);
+    const balanced = sliceAnsi(`${active}x`, 0, 1);
+    return line + balanced.slice(balanced.lastIndexOf("x") + 1);
   });
 }
 
