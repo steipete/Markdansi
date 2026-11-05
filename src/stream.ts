@@ -42,6 +42,8 @@ export type MarkdownStreamerOptions = {
 type FenceState = {
   char: "`" | "~";
   len: number;
+  closeCap: number;
+  child: boolean;
 };
 
 type PendingBlock =
@@ -52,17 +54,48 @@ function normalizeNewlines(input: string): string {
   return input.replace(/\r\n?/g, "\n");
 }
 
-function isFenceStart(line: string): FenceState | null {
+function isThematicBreak(line: string): boolean {
+  return /^ {0,3}(?:(?:-[ \t]*){3,}|(?:_[ \t]*){3,}|(?:\*[ \t]*){3,})$/.test(line);
+}
+
+// Continuation column is the list marker plus its padding (1-4 spaces).
+// A nested fence may sit up to three spaces past that column.
+function listContinuationColumn(line: string): number | null {
+  if (isThematicBreak(line)) return null;
+  const match = /^( {0,3})([-+*]|[0-9]{1,9}[.)])(.*)$/.exec(line);
+  const marker = match?.[2];
+  if (!match || !marker) return null;
+  const markerIndent = match[1]?.length ?? 0;
+  const after = match[3] ?? "";
+  if (after === "") return markerIndent + marker.length + 1;
+  if (after.startsWith("\t")) return markerIndent + marker.length + 1;
+  const padding = /^( +)/.exec(after)?.[1]?.length;
+  if (!padding) return null;
+  return markerIndent + marker.length + (padding > 4 ? 1 : padding);
+}
+
+function isFenceStart(line: string, listContent: number | null): FenceState | null {
   const trimmed = line.trimStart();
   const match = trimmed.match(/^(```+|~~~+)/);
   if (!match?.[1]) return null;
   const token = match[1];
   const char = token[0] === "~" ? "~" : "`";
-  return { char, len: token.length };
+  const leading = line.slice(0, line.length - trimmed.length);
+  // Tabs stay openers, matching trimStart, but a tab is not a space indent.
+  if (!/^ *$/.test(leading)) {
+    return { char, len: token.length, closeCap: 3, child: false };
+  }
+  const indent = leading.length;
+  if (listContent !== null && indent >= listContent && indent <= listContent + 3) {
+    return { char, len: token.length, closeCap: listContent + 3, child: true };
+  }
+  return { char, len: token.length, closeCap: 3, child: false };
 }
 
 function isFenceEnd(line: string, fence: FenceState): boolean {
-  const rest = line.replace(/^ {0,3}/, "");
+  let index = 0;
+  while (index < line.length && index < fence.closeCap && line[index] === " ") index += 1;
+  const rest = line.slice(index);
   if (!rest.startsWith(fence.char)) return false;
   let count = 0;
   while (rest[count] === fence.char) count += 1;
@@ -104,6 +137,8 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
   let started = false;
 
   let pending: PendingBlock | null = null;
+  let heldList: string | null = null;
+  let listContent: number | null = null;
 
   const emitBlankLine = () => {
     if (!started) return "";
@@ -125,6 +160,13 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
     const md = pending.md;
     pending = null;
     return emitRendered(md);
+  };
+
+  const flushHeldList = (): string => {
+    if (heldList === null) return "";
+    const line = heldList;
+    heldList = null;
+    return emitRendered(line);
   };
 
   const processLine = (line: string): string => {
@@ -151,13 +193,21 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
 
     // Blank line: flush any held header and emit spacing.
     if (line.trim().length === 0) {
-      return flushPending() + emitBlankLine();
+      return flushHeldList() + flushPending() + emitBlankLine();
     }
 
-    // Fence start: flush held header and enter fence mode.
-    const fenceStart = isFenceStart(line);
+    // Fence start: keep a child fence with its list item so render() can nest it.
+    const fenceStart = isFenceStart(line, listContent);
     if (fenceStart) {
-      const out = flushPending();
+      if (fenceStart.child && heldList !== null) {
+        const item = heldList;
+        heldList = null;
+        const out = flushPending();
+        pending = { kind: "fence", fence: fenceStart, md: `${item}\n${line}\n` };
+        return out;
+      }
+      listContent = null;
+      const out = flushHeldList() + flushPending();
       pending = { kind: "fence", fence: fenceStart, md: `${line}\n` };
       return out;
     }
@@ -165,21 +215,32 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
     // If we held a possible table header, check if this line starts a table.
     if (pending?.kind === "table" && !pending.committed) {
       if (isTableSeparator(line) && looksLikeTableRow(pending.md)) {
+        const out = flushHeldList();
         pending = { kind: "table", committed: true, md: `${pending.md}\n${line}\n` };
-        return "";
+        return out;
       }
-      const out = flushPending();
+      const out = flushHeldList() + flushPending();
       return out + processLine(line);
     }
 
     // Potential table header: delay emission until we see the next line.
     if (looksLikeTableRow(line)) {
+      const out = flushHeldList();
+      listContent = null;
       pending = { kind: "table", committed: false, md: line };
-      return "";
+      return out;
     }
 
-    // Normal line: render immediately.
-    return emitRendered(line);
+    const column = listContinuationColumn(line);
+    if (column !== null) {
+      const out = flushHeldList();
+      heldList = line;
+      listContent = column;
+      return out;
+    }
+
+    listContent = null;
+    return flushHeldList() + emitRendered(line);
   };
 
   const push = (delta: string): string => {
@@ -205,6 +266,7 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
       buffer = "";
     }
 
+    out += flushHeldList();
     out += flushPending();
 
     return out;
@@ -215,6 +277,8 @@ export function createMarkdownStreamer(options: MarkdownStreamerOptions): Markdo
     blankStreak = 0;
     started = false;
     pending = null;
+    heldList = null;
+    listContent = null;
   };
 
   return { push, finish, reset };

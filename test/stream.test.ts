@@ -15,6 +15,73 @@ describe("markdown streamer (hybrid)", () => {
     expect(s.push(" world\n")).toBe("Hello world\n");
   });
 
+  it.each([4, 5])("closes a list fence that is indented %i spaces", (spaces) => {
+    const pad = " ".repeat(spaces);
+    const markdown = `- item\n${pad}\`\`\`\n${pad}const x = 1\n${pad}\`\`\`\n\nnext\n`;
+    const streamed = createMarkdownStreamer({ render: renderNoColor }).finish(markdown);
+    expect(streamed).not.toContain("```");
+    expect(streamed).toContain("const x = 1");
+    expect(streamed).toContain("next");
+
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    const opened = s.push(`- item\n${pad}\`\`\`\n${pad}const x = 1\n${pad}\`\`\`\n`);
+    expect(opened).toContain("const x = 1");
+    expect(opened).not.toContain("```");
+    expect(s.push("\nnext\n")).toContain("next");
+    expect(s.finish()).not.toContain("next");
+  });
+
+  it.each([" ```", "  ```"])("closes %j when the closer has three spaces", (opener) => {
+    const markdown = `${opener}\ncode\n   \`\`\`\n`;
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    expect(s.push(`${opener}\ncode\n`)).toBe("");
+    const closed = s.push("   ```\n");
+    expect(closed).toContain("code");
+    expect(s.push("after\n")).toContain("after");
+    expect(closed.trimEnd()).toBe(renderNoColor(markdown).trimEnd());
+  });
+
+  it("keeps a four-space body line inside a zero-indent fence", () => {
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    expect(s.push("```\n    body\n")).toBe("");
+    expect(s.push("```\n")).toContain("    body");
+    expect(s.finish()).toBe("");
+  });
+
+  it("buffers a deeply indented list fence", () => {
+    const markdown = "123456. item\n        ~~~\n        **literal**\n        ~~~\n";
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    let streamed = s.push("123456. item\n");
+    const opener = s.push("        ~~~\n");
+    expect(opener).toBe("");
+    streamed += opener;
+    const body = s.push("        **literal**\n");
+    expect(body).toBe("");
+    streamed += body;
+    streamed += s.push("        ~~~\n");
+    streamed += s.finish();
+    expect(streamed.trimEnd()).toBe(renderNoColor(markdown).trimEnd());
+  });
+
+  it("keeps a top-level indented code fence literal", () => {
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    expect(s.push("before\n\n")).toContain("before");
+    expect(s.push("    ```\n    **literal**\n    ```\n")).toBe("");
+    const rest = s.finish("\nafter");
+    expect(rest).toContain("```");
+    expect(rest).toContain("**literal**");
+    expect(rest).toContain("after");
+  });
+
+  it("buffers a tab-prefixed fence", () => {
+    const markdown = "\t~~~\n\t**literal**\n\t~~~\n";
+    const s = createMarkdownStreamer({ render: renderNoColor });
+    expect(s.push("\t~~~\n")).toBe("");
+    expect(s.push("\t**literal**\n")).toBe("");
+    expect(s.push("\t~~~\n")).toBe("");
+    expect(s.finish().trimEnd()).toBe(renderNoColor(markdown).trimEnd());
+  });
+
   it("does not close a fence on a body line that only starts with the marker", () => {
     const markdown = "```\n```js\n**literal**\n    ```\n```\n";
     const streamed = createMarkdownStreamer({ render: renderNoColor }).finish(markdown);
