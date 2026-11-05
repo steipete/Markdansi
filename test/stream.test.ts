@@ -15,6 +15,14 @@ describe("markdown streamer (hybrid)", () => {
     expect(s.push(" world\n")).toBe("Hello world\n");
   });
 
+  it("closes a list fence that is indented four spaces", () => {
+    const markdown = "- item\n    ```\n    const x = 1\n    ```\n\nnext\n";
+    const streamed = createMarkdownStreamer({ render: renderNoColor }).finish(markdown);
+    expect(streamed).not.toContain("```");
+    expect(streamed).toContain("const x = 1");
+    expect(streamed).toContain("next");
+  });
+
   it("does not close a fence on a body line that only starts with the marker", () => {
     const markdown = "```\n```js\n**literal**\n    ```\n```\n";
     const streamed = createMarkdownStreamer({ render: renderNoColor }).finish(markdown);

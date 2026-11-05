@@ -42,6 +42,7 @@ export type MarkdownStreamerOptions = {
 type FenceState = {
   char: "`" | "~";
   len: number;
+  indent: number;
 };
 
 type PendingBlock =
@@ -53,16 +54,20 @@ function normalizeNewlines(input: string): string {
 }
 
 function isFenceStart(line: string): FenceState | null {
-  const trimmed = line.trimStart();
+  const indent = line.match(/^( *)/)?.[1].length ?? 0;
+  // Eight or more spaces is indented code for render(), not a fence the streamer can close.
+  if (indent >= 8) return null;
+  const trimmed = line.slice(indent);
   const match = trimmed.match(/^(```+|~~~+)/);
   if (!match?.[1]) return null;
   const token = match[1];
   const char = token[0] === "~" ? "~" : "`";
-  return { char, len: token.length };
+  return { char, len: token.length, indent };
 }
 
 function isFenceEnd(line: string, fence: FenceState): boolean {
-  const rest = line.replace(/^ {0,3}/, "");
+  const cap = fence.indent === 0 ? 3 : fence.indent;
+  const rest = line.replace(new RegExp(`^ {0,${cap}}`), "");
   if (!rest.startsWith(fence.char)) return false;
   let count = 0;
   while (rest[count] === fence.char) count += 1;
