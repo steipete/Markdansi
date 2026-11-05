@@ -503,7 +503,11 @@ function renderCodeBlock(node: Code, ctx: RenderContext): string[] {
   }
 
   // Boxed block
-  const maxLine = Math.max(...contentLines.map((l: string) => visibleWidth(l)), 0);
+  let maxLine = 0;
+  for (const line of contentLines) {
+    const width = visibleWidth(line);
+    if (width > maxLine) maxLine = width;
+  }
   const minInner = node.lang ? node.lang.length + 2 : 0;
   const wrapTarget =
     ctx.options.codeWrap && ctx.options.width
