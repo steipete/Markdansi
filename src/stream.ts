@@ -54,7 +54,7 @@ function normalizeNewlines(input: string): string {
 }
 
 function isFenceStart(line: string): FenceState | null {
-  const indent = line.match(/^( *)/)?.[1].length ?? 0;
+  const indent = line.match(/^( *)/)?.[1]?.length ?? 0;
   // Eight or more spaces is indented code for render(), not a fence the streamer can close.
   if (indent >= 8) return null;
   const trimmed = line.slice(indent);
