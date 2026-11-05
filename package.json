@@ -55,23 +55,23 @@
     "markdansi": "tsx src/cli.ts"
   },
   "dependencies": {
-    "ansi-regex": "^6.4.0",
+    "ansi-regex": "^6.5.0",
     "chalk": "^6.0.1",
     "decode-named-character-reference": "^1.3.0",
-    "marked": "^18.1.1",
+    "marked": "^18.1.3",
     "slice-ansi": "^9.0.1",
     "string-width": "^8.3.0",
     "strip-ansi": "^7.2.0",
     "supports-hyperlinks": "^4.6.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "@vitest/coverage-v8": "^5.0.5",
-    "oxfmt": "^0.74.0",
-    "oxlint": "^1.89.0",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.1.0",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": ">=22"

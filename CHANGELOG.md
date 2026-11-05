@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Blockquotes: fit quoted content beside the prefix and keep code boxes, list indentation, and nested quotes intact.
-- Headings: wrap long headings to the width, as paragraphs do.
+- Dependencies: refresh ANSI detection, Marked, Vitest, Node.js types, and Oxc tooling while preserving the Node.js 22 floor.
+- Blockquotes: fit quoted content beside the prefix and keep code boxes, list indentation, and nested quotes intact (#35, thanks @devYRPauli).
+- Headings: wrap long headings to the width, as paragraphs do (#35, thanks @devYRPauli).
 
 ## 0.3.7 (2026-10-23)
 
