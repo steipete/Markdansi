@@ -2,9 +2,13 @@
 
 ## Unreleased
 
-- Dependencies: refresh ANSI detection, Marked, Vitest, Node.js types, and Oxc tooling while preserving the Node.js 22 floor.
+## 0.3.8 (2026-11-05)
+
+**Highlights:** Preserve blockquote layout, code boxes, and nested indentation, and wrap long headings to the terminal width.
+
 - Blockquotes: fit quoted content beside the prefix and keep code boxes, list indentation, and nested quotes intact (#35, thanks @devYRPauli).
 - Headings: wrap long headings to the width, as paragraphs do (#35, thanks @devYRPauli).
+- Dependencies: refresh ANSI detection, Marked, Vitest, Node.js types, and Oxc tooling while preserving the Node.js 22 floor.
 
 ## 0.3.7 (2026-10-23)
 
