@@ -44,7 +44,7 @@ The built-in theme names are `default`, `dim`, `bright`, `solarized`, `monochrom
 - Blockquotes reserve the prefix width before laying out child blocks, preserving code borders, list indentation, and nested quote prefixes. Long headings wrap to the available width.
 - Tables use Unicode borders by default, honor GFM alignment, and shrink or truncate cells to fit the render width where possible.
 - Fenced code uses a box by default, displays a language label when present, and can wrap or show a line-number gutter.
-- Streaming keeps fenced code buffered until a closer of the same marker with at least the opening length, up to three leading spaces, and only spaces or tabs after it. Fence-like body lines remain literal code.
+- Streaming keeps fenced code buffered until a closer of the same marker with at least the opening length and only spaces or tabs after it. A top-level closer may use up to three leading spaces. A fence under a list item may also close at that item's indent. A four-space indented block at the top level stays literal, and fence-like body lines stay inside the fence.
 - Links use OSC-8 when enabled and supported. Without hyperlinks, inline links render as `label (URL)` and autolinks render as the URL.
 - `wrap: false` disables hard wrapping and causes `width` to be ignored.
 - Paragraphs and wrapped table cells keep source spacing within phrases when moving trailing articles or prepositions to the next line.
@@ -59,6 +59,6 @@ Markdansi does not render images, footnotes, or math, and it does not interpret 
 
 `createMarkdownStreamer(options)` accepts appended Markdown chunks through `push()` and flushes remaining content through `finish()`. `reset()` clears its state for reuse.
 
-The only streaming mode is `hybrid`. It emits complete ordinary lines immediately, buffers fenced code until its closing fence, and buffers tables until the table ends. Both backtick and tilde fences are buffered even without a language label, so Markdown inside code stays literal. The `spacing` option accepts `preserve`, `single` (the default), or `tight`.
+The only streaming mode is `hybrid`. It emits complete ordinary lines immediately, but holds a list item until the next line so a nested fence can render with that item. It buffers fenced code until its closing fence, and buffers tables until the table ends. Both backtick and tilde fences are buffered even without a language label, so Markdown inside code stays literal. The `spacing` option accepts `preserve`, `single` (the default), or `tight`.
 
 The supplied `render(markdown)` callback must return a self-contained fragment without relying on prior terminal state. Streaming output is append-only and does not move the cursor.
