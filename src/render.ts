@@ -400,7 +400,8 @@ function renderParagraph(node: Paragraph, ctx: RenderContext): string[] {
 function renderHeading(node: Heading, ctx: RenderContext): string[] {
   const text = renderInline(node.children, ctx);
   const styled = ctx.style(text, ctx.options.theme.heading);
-  return [`\n${styled}\n`];
+  const lines = wrapWithPrefix(styled, ctx.options.width ?? 80, ctx.options.wrap);
+  return [`\n${lines.join("\n")}\n`];
 }
 
 function renderHr(ctx: RenderContext): string[] {
@@ -410,13 +411,14 @@ function renderHr(ctx: RenderContext): string[] {
 }
 
 function renderBlockquote(node: Blockquote, ctx: RenderContext): string[] {
-  // Render blockquote children as text, then wrap with the quote prefix so
-  // wrapping accounts for prefix width.
-  const inner = renderChildren(node.children, ctx);
+  // Children render at the width left beside the prefix and are not wrapped
+  // again, so code boxes, lists, and nested quotes keep their own layout.
   const prefix = ctx.style(ctx.options.quotePrefix, ctx.options.theme.quote);
-  const text = inner.join("").trimEnd();
-  const wrapped = wrapWithPrefix(text, ctx.options.width ?? 80, ctx.options.wrap, prefix);
-  return wrapped.map((l) => `${l}\n`);
+  const { width } = ctx.options;
+  const childWidth = width === undefined ? undefined : Math.max(1, width - visibleWidth(prefix));
+  const childCtx: RenderContext = { ...ctx, options: { ...ctx.options, width: childWidth } };
+  const inner = renderChildren(node.children, childCtx).join("").trimEnd().split("\n");
+  return inner.map((l) => `${prefix}${l}\n`);
 }
 
 function renderList(node: List, ctx: RenderContext): string[] {

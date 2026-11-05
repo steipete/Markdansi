@@ -41,6 +41,7 @@ The built-in theme names are `default`, `dim`, `bright`, `solarized`, `monochrom
 
 - GitHub Flavored Markdown covers headings, paragraphs, blockquotes, fenced and indented code, tables, ordered and unordered lists, task lists, links, autolinks, emphasis, strong text, and strikethrough.
 - Each nested list level adds `listIndent` spaces. Item content wraps to the width left beside its marker; continuation lines use `listIndent` spaces and retain child list or code indentation.
+- Blockquotes reserve the prefix width before laying out child blocks, preserving code borders, list indentation, and nested quote prefixes. Long headings wrap to the available width.
 - Tables use Unicode borders by default, honor GFM alignment, and shrink or truncate cells to fit the render width where possible.
 - Fenced code uses a box by default, displays a language label when present, and can wrap or show a line-number gutter.
 - Streaming keeps fenced code buffered until a closer of the same marker with at least the opening length, up to three leading spaces, and only spaces or tabs after it. Fence-like body lines remain literal code.

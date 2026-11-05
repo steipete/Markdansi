@@ -307,6 +307,42 @@ describe("blockquotes", () => {
     const out = strip("> quoted line", noColor);
     expect(out.trim().startsWith("│ ")).toBe(true);
   });
+
+  it("keeps a code box intact inside a quote", () => {
+    const out = strip("> ```js\n> const value = 1;\n> other();\n> ```", { ...noColor, width: 20 });
+    expect(out).toBe(
+      "│ ┌ [js]───────────┐\n│ │ const value =  │\n│ │ 1;             │\n│ │ other();       │\n│ └────────────────┘\n",
+    );
+  });
+
+  it("keeps list and nested quote indentation inside a quote", () => {
+    const md = "> - one two three four five six\n>\n> > inner quote words that wrap";
+    const out = strip(md, { ...noColor, width: 20 });
+    expect(out).toBe(
+      "│ - one two three\n│   four five six\n│ │ inner quote\n│ │ words that wrap\n",
+    );
+  });
+
+  it("wraps quoted paragraphs once to the width left beside the prefix", () => {
+    const out = strip("> one two three four five six seven eight nine ten", {
+      ...noColor,
+      width: 20,
+    });
+    expect(out).toBe("│ one two three four\n│ five six seven\n│ eight nine ten\n");
+  });
+
+  it("wraps quoted headings to the width left beside the prefix", () => {
+    const out = strip("> # one two three four five six", { ...noColor, width: 20 });
+    expect(out).toBe("│ \n│ one two three four\n│ five six\n");
+  });
+
+  it("prefixes quoted lines without wrapping when wrap is off", () => {
+    const out = strip("> one two three four five six seven eight nine ten", {
+      ...noColor,
+      wrap: false,
+    });
+    expect(out).toBe("│ one two three four five six seven eight nine ten\n");
+  });
 });
 
 describe("cli stdout EPIPE handling", () => {
