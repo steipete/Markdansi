@@ -345,6 +345,15 @@ describe("blockquotes", () => {
   });
 });
 
+describe("dedent", () => {
+  it("strips a shared indent from a very large document", () => {
+    const markdown = `${"  x\n".repeat(150_000)}`;
+    const out = strip(markdown, { ...noColor, wrap: false });
+    expect(out.startsWith("x")).toBe(true);
+    expect(out).not.toContain("\n  x");
+  });
+});
+
 describe("cli stdout EPIPE handling", () => {
   it("exits cleanly on EPIPE", () => {
     const exitSpy = vi.spyOn(process, "exit").mockReturnValue(undefined as never);

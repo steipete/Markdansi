@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Documents: dedent a very large indented document instead of throwing while measuring the shared indent.
+
 ## 0.3.8 (2026-11-05)
 
 **Highlights:** Preserve blockquote layout, code boxes, and nested indentation, and wrap long headings to the terminal width.

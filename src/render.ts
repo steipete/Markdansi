@@ -47,12 +47,13 @@ type RenderContext = {
 
 function dedent(markdown: string): string {
   const lines = markdown.split("\n");
-  const indents = lines
-    .filter((l) => l.trim() !== "")
-    .map((l) => l.match(/^[ \t]*/)?.[0].length ?? 0);
-  if (indents.length === 0) return markdown;
-  const minIndent = Math.min(...indents);
-  if (minIndent === 0) return markdown;
+  let minIndent = Number.POSITIVE_INFINITY;
+  for (const line of lines) {
+    if (line.trim() === "") continue;
+    const indent = line.match(/^[ \t]*/)?.[0].length ?? 0;
+    if (indent < minIndent) minIndent = indent;
+  }
+  if (!Number.isFinite(minIndent) || minIndent === 0) return markdown;
   return lines.map((l) => l.slice(Math.min(minIndent, l.length))).join("\n");
 }
 
