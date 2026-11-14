@@ -1,7 +1,5 @@
-import supportsHyperlinks from "supports-hyperlinks";
 import { describe, expect, it, vi } from "vitest";
 import { handleStdoutEpipe, parseArgs } from "../src/cli.ts";
-import { hyperlinkSupported } from "../src/hyperlink.ts";
 import { render, strip } from "../src/index.ts";
 import { createStyler, themes } from "../src/theme.ts";
 import { visibleWidth, wrapText } from "../src/wrap.ts";
@@ -286,18 +284,13 @@ describe("hyperlinks", () => {
     expect(out).toContain("x (https://example.com)");
   });
 
-  it("returns false when supports-hyperlinks stdout is missing", () => {
-    const original = supportsHyperlinks.stdout;
-    // eslint-disable-next-line no-param-reassign
-    supportsHyperlinks.stdout = undefined;
+  it.each(["1", "0"])("honors automatic hyperlink override %s", (value) => {
+    vi.stubEnv("FORCE_HYPERLINK", value);
     try {
-      expect(hyperlinkSupported()).toBe(false);
-      // also cover the true-path call
-      supportsHyperlinks.stdout = () => true;
-      expect(hyperlinkSupported()).toBe(true);
+      const out = render("[synthetic](https://example.invalid)", { color: true });
+      expect(out.includes("\u001B]8;;")).toBe(value === "1");
     } finally {
-      // eslint-disable-next-line no-param-reassign
-      supportsHyperlinks.stdout = original;
+      vi.unstubAllEnvs();
     }
   });
 });
@@ -342,6 +335,15 @@ describe("blockquotes", () => {
       wrap: false,
     });
     expect(out).toBe("│ one two three four five six seven eight nine ten\n");
+  });
+});
+
+describe("dedent", () => {
+  it("strips a shared indent from a very large document", () => {
+    const markdown = `${"  x\n".repeat(150_000)}`;
+    const out = strip(markdown, { ...noColor, wrap: false });
+    expect(out.startsWith("x")).toBe(true);
+    expect(out).not.toContain("\n  x");
   });
 });
 

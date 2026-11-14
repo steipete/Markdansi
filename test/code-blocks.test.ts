@@ -25,6 +25,19 @@ describe("code blocks", () => {
     expect(firstLine.length).toBeGreaterThan(15);
   });
 
+  it("boxes a very wide code line without overflowing the stack", () => {
+    const md = "```js\n" + "a".repeat(150_000) + "\nb\n```";
+    expect(() =>
+      render(md, {
+        color: false,
+        hyperlinks: false,
+        codeBox: true,
+        codeWrap: true,
+        width: 1,
+      }),
+    ).not.toThrow();
+  });
+
   it("respects codeBox=false with gutter", () => {
     const md = "```\nline1\nline2\n```";
     const out = render(md, {
