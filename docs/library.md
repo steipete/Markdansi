@@ -43,9 +43,9 @@ The built-in theme names are `default`, `dim`, `bright`, `solarized`, `monochrom
 - Each nested list level adds `listIndent` spaces. Item content wraps to the width left beside its marker; continuation lines use `listIndent` spaces and retain child list or code indentation.
 - Blockquotes reserve the prefix width before laying out child blocks, preserving code borders, list indentation, and nested quote prefixes. Long headings wrap to the available width.
 - Tables use Unicode borders by default, honor GFM alignment, and shrink or truncate cells to fit the render width where possible.
-- Fenced code uses a box by default, displays a language label when present, and can wrap or show a line-number gutter.
+- Fenced code uses a box by default, displays a language label when present, and can wrap or show a line-number gutter. Large documents and heavily wrapped code blocks are measured without depending on the runtime argument-count limit.
 - Streaming keeps fenced code buffered until a closer of the same marker with at least the opening length, up to three leading spaces, and only spaces or tabs after it. Fence-like body lines remain literal code.
-- Links use OSC-8 when enabled and supported. Without hyperlinks, inline links render as `label (URL)` and autolinks render as the URL.
+- Links use OSC-8 when enabled and supported; automatic detection honors the terminal capabilities and `FORCE_HYPERLINK` override. Without hyperlinks, inline links render as `label (URL)` and autolinks render as the URL.
 - `wrap: false` disables hard wrapping and causes `width` to be ignored.
 - Paragraphs and wrapped table cells keep source spacing within phrases when moving trailing articles or prepositions to the next line.
 - Chinese, Japanese, and Korean text can wrap without spaces, preserving grapheme clusters, styles, and hyperlinks. Opening punctuation stays with the following text; closing punctuation stays with the preceding text. Unbreakable words or punctuation groups wider than the available width can still overflow.

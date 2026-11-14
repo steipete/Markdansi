@@ -47,12 +47,13 @@ type RenderContext = {
 
 function dedent(markdown: string): string {
   const lines = markdown.split("\n");
-  const indents = lines
-    .filter((l) => l.trim() !== "")
-    .map((l) => l.match(/^[ \t]*/)?.[0].length ?? 0);
-  if (indents.length === 0) return markdown;
-  const minIndent = Math.min(...indents);
-  if (minIndent === 0) return markdown;
+  let minIndent = Number.POSITIVE_INFINITY;
+  for (const line of lines) {
+    if (line.trim() === "") continue;
+    const indent = line.match(/^[ \t]*/)?.[0].length ?? 0;
+    if (indent < minIndent) minIndent = indent;
+  }
+  if (!Number.isFinite(minIndent) || minIndent === 0) return markdown;
   return lines.map((l) => l.slice(Math.min(minIndent, l.length))).join("\n");
 }
 
@@ -503,7 +504,11 @@ function renderCodeBlock(node: Code, ctx: RenderContext): string[] {
   }
 
   // Boxed block
-  const maxLine = Math.max(...contentLines.map((l: string) => visibleWidth(l)), 0);
+  let maxLine = 0;
+  for (const line of contentLines) {
+    const width = visibleWidth(line);
+    if (width > maxLine) maxLine = width;
+  }
   const minInner = node.lang ? node.lang.length + 2 : 0;
   const wrapTarget =
     ctx.options.codeWrap && ctx.options.width
