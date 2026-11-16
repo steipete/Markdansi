@@ -1,6 +1,6 @@
 {
   "name": "markdansi",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Tiny dependency-light markdown to ANSI converter.",
   "keywords": [
     "ansi",
