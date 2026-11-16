@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.3.9 (2026-11-15)
+
+**Highlights:** Render large documents and heavily wrapped code without argument-limit crashes, and restore automatic terminal hyperlinks.
+
 - Rendering: avoid argument-limit crashes when dedenting large documents or boxing heavily wrapped code. Thanks @SebTardif (#37, #39).
 - Links: restore automatic OSC-8 hyperlink detection and honor FORCE_HYPERLINK overrides using the supported stream detector.
 - Dependencies: refresh Markdown parsing, ANSI utilities, linting, and transitive tooling while preserving Node.js 22 support and security overrides.
