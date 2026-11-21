@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Dependencies: refresh Marked, Vitest, Oxlint, and compatible transitive tooling while retaining the Node.js 22 floor and updating the Vite security override.
+
 ## 0.3.9 (2026-11-15)
 
 **Highlights:** Render large documents and heavily wrapped code without argument-limit crashes, and restore automatic terminal hyperlinks.
